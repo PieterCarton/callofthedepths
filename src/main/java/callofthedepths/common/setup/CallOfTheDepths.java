@@ -1,5 +1,6 @@
 package callofthedepths.common.setup;
 
+import callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,9 +20,11 @@ import java.util.stream.Collectors;
 
 @Mod("callofthedepths")
 public class CallOfTheDepths {
+    public static final String MOD_ID = "callofthedepths";
     private static final Logger LOGGER = LogManager.getLogger();
 
     public CallOfTheDepths() {
+        COTDItems.init();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -35,9 +38,7 @@ public class CallOfTheDepths {
 
     private void setup(final FMLCommonSetupEvent event)
     {
-        // some preinit code
-        LOGGER.info("HELLO FROM PREINIT");
-        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        System.out.println("CommonSetup");
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
