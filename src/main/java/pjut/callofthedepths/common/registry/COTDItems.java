@@ -1,10 +1,10 @@
-package callofthedepths.common.registry;
+package pjut.callofthedepths.common.registry;
 
-import callofthedepths.common.item.COTDFoods;
-import callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.item.COTDFoods;
+import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.item.TorchArrowItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -16,6 +16,8 @@ public class COTDItems {
 
     public static final RegistryObject<Item> GLOW_BERRY_BAR = ITEMS.register("glow_berry_bar",
             () -> new Item(new Item.Properties().food(COTDFoods.GLOW_BERRY_BAR).tab(CreativeModeTab.TAB_FOOD)));
+    public static final RegistryObject<Item> TORCH_ARROW = ITEMS.register("torch_arrow",
+            () -> new TorchArrowItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
 
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

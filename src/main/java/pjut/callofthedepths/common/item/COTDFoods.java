@@ -1,4 +1,4 @@
-package callofthedepths.common.item;
+package pjut.callofthedepths.common.item;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;

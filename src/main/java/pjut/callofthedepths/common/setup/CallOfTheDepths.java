@@ -1,8 +1,7 @@
-package callofthedepths.common.setup;
+package pjut.callofthedepths.common.setup;
 
-import callofthedepths.common.registry.COTDItems;
+import pjut.callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
