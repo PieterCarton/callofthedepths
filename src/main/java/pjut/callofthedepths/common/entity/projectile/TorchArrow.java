@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import org.lwjgl.system.CallbackI;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDItems;
 
@@ -53,34 +54,28 @@ public class TorchArrow extends AbstractArrow {
         BlockState blockState = this.level.getBlockState(hitPos);
 
         BlockState placeState = null;
-        BlockPos placePos = null;
+        BlockPos placePos = hitPos.mutable().move(hitDirection);
 
         boolean placementFailed = false;
 
         if (hitDirection == Direction.DOWN) {
             placementFailed = true;
         } else if (hitDirection == Direction.UP) {
-            BlockState torchBlock = Blocks.TORCH.defaultBlockState();
-            //if (blockState.canBeReplaced()) {
-            level.setBlock(hitPos.above(), torchBlock, Integer.MAX_VALUE);
-            //}
-
+            placeState = Blocks.TORCH.defaultBlockState();
         } else {
-            Block wallTorchBlock = Blocks.WALL_TORCH;
-            //ItemStack itemStack = new ItemStack(COTDItems.TORCH_ARROW.get());
-            //BlockPlaceContext context = new BlockPlaceContext(this.getLevel(), null, InteractionHand.MAIN_HAND, itemStack, hitResult);
-
-            BlockState placementState = wallTorchBlock.defaultBlockState().setValue(WallTorchBlock.FACING, hitDirection);
-            System.out.println(placementState);
-
-            level.setBlock(hitPos.mutable().move(hitDirection), placementState, Integer.MAX_VALUE);
+            placeState = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, hitDirection);
         }
 
-        if (placementFailed) {
+        boolean replaceable = this.getLevel().getBlockState(placePos).getMaterial().isReplaceable();
+        boolean validSide = blockState.isFaceSturdy(this.getLevel(), placePos, hitDirection);
+
+        if (!placementFailed && replaceable && validSide) {
+            level.setBlock(placePos, placeState, Integer.MAX_VALUE);
+        } else {
+            // TODO: fix multi-shot crossbow duplication
             ItemStack itemStack = new ItemStack(COTDItems.TORCH_ARROW.get());
             level.addFreshEntity(new ItemEntity(this.getLevel(), this.getX(), this.getY(), this.getZ(), itemStack));
         }
-
 
         this.discard();
     }
