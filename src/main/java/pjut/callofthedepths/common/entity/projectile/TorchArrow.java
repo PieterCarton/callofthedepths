@@ -70,8 +70,9 @@ public class TorchArrow extends AbstractArrow {
         boolean validSide = blockState.isFaceSturdy(this.getLevel(), placePos, hitDirection);
 
         if (!placementFailed && replaceable && validSide) {
-            // TODO: fix light glitch on reload world
             level.setBlock(placePos, placeState, Integer.MAX_VALUE);
+            // force light update
+            level.getLightEngine().checkBlock(placePos);
         } else {
             // TODO: fix multi-shot crossbow duplication
             ItemStack itemStack = new ItemStack(COTDItems.TORCH_ARROW.get());

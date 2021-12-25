@@ -1,11 +1,18 @@
 package pjut.callofthedepths.common.setup;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.lwjgl.system.CallbackI;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
+import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
@@ -15,9 +22,6 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +43,7 @@ public class CallOfTheDepths {
         // Register the processIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onPostSetup);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -72,7 +77,16 @@ public class CallOfTheDepths {
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
+    }
 
+    public void onPostSetup(FMLLoadCompleteEvent evt) {
+        DispenserBlock.registerBehavior(COTDItems.TORCH_ARROW.get(), new AbstractProjectileDispenseBehavior() {
+            protected Projectile getProjectile(Level p_123407_, Position p_123408_, ItemStack p_123409_) {
+                AbstractArrow arrow = new TorchArrow(p_123407_, p_123408_.x(), p_123408_.y(), p_123408_.z());
+                arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+                return arrow;
+            }
+        });
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

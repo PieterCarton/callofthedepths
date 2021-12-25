@@ -15,4 +15,6 @@ public class TorchArrowItem extends ArrowItem {
     public AbstractArrow createArrow(Level p_40513_, ItemStack p_40514_, LivingEntity p_40515_) {
         return new TorchArrow(p_40513_, p_40515_);
     }
+
+
 }
