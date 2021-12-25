@@ -18,9 +18,10 @@ public class COTDDataGeneration {
             BlockTagsProvider provider = new COTDBlockTagsProvider(generator, "callofthedepths", helper);
             generator.addProvider(provider);
             generator.addProvider(new COTDItemTagsProvider(generator, provider, "callofthedepths", helper));
+            generator.addProvider(new COTDRecipeProvider(generator));
         }
         if (evt.includeClient()) {
-            // add necessary providers
+            generator.addProvider(new COTDItemModelProvider(generator, helper));
         }
     }
 }
