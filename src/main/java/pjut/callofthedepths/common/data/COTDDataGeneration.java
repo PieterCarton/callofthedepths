@@ -6,6 +6,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
+import pjut.callofthedepths.common.data.loot.COTDLootTableProvider;
 
 @Mod.EventBusSubscriber(modid = "callofthedepths", bus = Mod.EventBusSubscriber.Bus.MOD)
 public class COTDDataGeneration {
@@ -19,6 +20,7 @@ public class COTDDataGeneration {
             generator.addProvider(provider);
             generator.addProvider(new COTDItemTagsProvider(generator, provider, "callofthedepths", helper));
             generator.addProvider(new COTDRecipeProvider(generator));
+            generator.addProvider(new COTDLootTableProvider(generator));
         }
         if (evt.includeClient()) {
             generator.addProvider(new COTDItemModelProvider(generator, helper));

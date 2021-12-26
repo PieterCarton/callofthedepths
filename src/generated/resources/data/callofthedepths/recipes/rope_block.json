@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  S",
+    " S ",
+    "S  "
+  ],
+  "key": {
+    "S": {
+      "tag": "forge:string"
+    }
+  },
+  "result": {
+    "item": "callofthedepths:rope_block",
+    "count": 8
+  }
+}

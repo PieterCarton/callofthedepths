@@ -28,5 +28,13 @@ public class COTDRecipeProvider extends RecipeProvider {
                 .pattern("Y")
                 .unlockedBy("has_components", has(ItemTags.COALS))
                 .save(recipeConsumer);
+
+        ShapedRecipeBuilder.shaped(COTDItems.ROPE_BLOCK.get(),8)
+                .define('S', Tags.Items.STRING)
+                .pattern("  S")
+                .pattern(" S ")
+                .pattern("S  ")
+                .unlockedBy("has_components", has(Tags.Items.STRING))
+                .save(recipeConsumer);
     }
 }

@@ -1,4 +1,7 @@
 2e8b8d906fc1e6cea81426d349242979a2c968bb assets/callofthedepths/models/item/torch_arrow.json
+95c5ef128177204e612ab3fbc353c4eb827d8f44 data/callofthedepths/advancements/recipes/food/rope_block.json
 cbf105834afe66b48cbf65504f5eab38e986155e data/callofthedepths/advancements/recipes/food/torch_arrow.json
+a05358b34a9fbef9fc561a86900f6e06055d3f83 data/callofthedepths/loot_tables/blocks/rope_block.json
+d81fd1c8b08b3f91442053bf89bc9cde60ba3bc0 data/callofthedepths/recipes/rope_block.json
 86ff2397a224becb7f30fb6d9eb2bc33ebae6579 data/callofthedepths/recipes/torch_arrow.json
 97bc28c188e41dcb4de30db6b1c070106e04484b data/minecraft/tags/items/arrows.json
