@@ -1,6 +1,7 @@
 package pjut.callofthedepths.common.registry;
 
 import pjut.callofthedepths.common.item.COTDFoods;
+import pjut.callofthedepths.common.item.RopeItem;
 import pjut.callofthedepths.common.setup.CallOfTheDepths;
 import pjut.callofthedepths.common.item.TorchArrowItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -18,6 +19,8 @@ public class COTDItems {
             () -> new Item(new Item.Properties().food(COTDFoods.GLOW_BERRY_BAR).tab(CreativeModeTab.TAB_FOOD)));
     public static final RegistryObject<Item> TORCH_ARROW = ITEMS.register("torch_arrow",
             () -> new TorchArrowItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
+    public static final RegistryObject<Item> ROPE_BLOCK = ITEMS.register("rope_block",
+            () -> new RopeItem(COTDBlocks.ROPE_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
 
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());

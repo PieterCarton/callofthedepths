@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "attached=false,top=false": {
+      "model": "callofthedepths:block/rope_bottom"
+    },
+    "attached=false,top=true": {
+      "model": "callofthedepths:block/rope_both"
+    },
+    "attached=true,top=false": {
+      "model": "callofthedepths:block/rope_centre"
+    },
+    "attached=true,top=true": {
+      "model": "callofthedepths:block/rope_top"
+    }
+  }
+}

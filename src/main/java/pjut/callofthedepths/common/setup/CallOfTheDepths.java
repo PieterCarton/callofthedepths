@@ -1,5 +1,7 @@
 package pjut.callofthedepths.common.setup;
 
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
@@ -13,6 +15,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
+import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
@@ -35,6 +38,7 @@ public class CallOfTheDepths {
 
     public CallOfTheDepths() {
         COTDItems.init();
+        COTDBlocks.init();
         COTDEntityTypes.init();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -77,6 +81,8 @@ public class CallOfTheDepths {
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
+
+        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
     }
 
     public void onPostSetup(FMLLoadCompleteEvent evt) {
