@@ -16,5 +16,9 @@ public class COTDItemModelProvider extends ItemModelProvider {
     public void registerModels() {
         getBuilder("torch_arrow").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
                 .texture("layer0", "item/torch_arrow");
+        getBuilder("granola_bar").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
+                .texture("layer0", "item/granola_bar");
+        getBuilder("glow_berry_bar").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
+                .texture("layer0", "item/glow_berry_bar");
     }
 }

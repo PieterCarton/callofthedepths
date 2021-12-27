@@ -17,6 +17,8 @@ public class COTDItems {
 
     public static final RegistryObject<Item> GLOW_BERRY_BAR = ITEMS.register("glow_berry_bar",
             () -> new Item(new Item.Properties().food(COTDFoods.GLOW_BERRY_BAR).tab(CreativeModeTab.TAB_FOOD)));
+    public static final RegistryObject<Item> GRANOLA_BAR = ITEMS.register("granola_bar",
+            () -> new Item(new Item.Properties().food(COTDFoods.GRANOLA_BAR).tab(CreativeModeTab.TAB_FOOD)));
     public static final RegistryObject<Item> TORCH_ARROW = ITEMS.register("torch_arrow",
             () -> new TorchArrowItem(new Item.Properties().tab(CreativeModeTab.TAB_FOOD)));
     public static final RegistryObject<Item> ROPE_BLOCK = ITEMS.register("rope_block",
