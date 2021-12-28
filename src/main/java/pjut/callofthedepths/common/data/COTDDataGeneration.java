@@ -23,7 +23,9 @@ public class COTDDataGeneration {
             generator.addProvider(new COTDLootTableProvider(generator));
         }
         if (evt.includeClient()) {
+            generator.addProvider(new COTDBlockModelProvider(generator, helper));
             generator.addProvider(new COTDItemModelProvider(generator, helper));
+            generator.addProvider(new COTDBlockStateProvider(generator, helper));
         }
     }
 }

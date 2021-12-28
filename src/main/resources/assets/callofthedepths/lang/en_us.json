@@ -1,8 +1,11 @@
 {
-  "itemgroup.callofthedepths.callofthedepthsitems": "Call of the Depths",
+  "block.callofthedepths.gypsum": "Gypsum",
   "block.callofthedepths.rope_block": "Caving Rope",
-  "item.callofthedepths.granola_bar": "Granola Bar",
-  "item.callofthedepths.glow_berry_bar": "Glow Berry Bar",
+  "entity.callofthedepths.crawler": "Crawler",
+  "entity.callofthedepths.torch_arrow": "Torch Arrow",
   "item.callofthedepths.crawler_spawn_egg": "Crawler Spawn Egg",
-  "item.callofthedepths.torch_arrow": "Torch Arrow"
+  "item.callofthedepths.glow_berry_bar": "Glow Berry Bar",
+  "item.callofthedepths.granola_bar": "Granola Bar",
+  "item.callofthedepths.torch_arrow": "Torch Arrow",
+  "itemgroup.callofthedepths.callofthedepthsitems": "Call of the Depths"
 }

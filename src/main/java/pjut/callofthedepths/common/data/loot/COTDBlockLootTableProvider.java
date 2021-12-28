@@ -16,13 +16,16 @@ public class COTDBlockLootTableProvider extends BlockLoot {
     @Override
     protected void addTables() {
         dropSelf(COTDBlocks.ROPE_BLOCK.get());
+        dropSelf(COTDBlocks.GYPSUM.get());
     }
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        System.out.println("called get known");
         List<Block> known = new LinkedList<>();
+
         known.add(COTDBlocks.ROPE_BLOCK.get());
+        known.add(COTDBlocks.GYPSUM.get());
+
         return known;
     }
 }
