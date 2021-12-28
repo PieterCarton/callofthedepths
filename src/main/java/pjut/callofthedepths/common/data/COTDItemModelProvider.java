@@ -20,5 +20,7 @@ public class COTDItemModelProvider extends ItemModelProvider {
                 .texture("layer0", "item/granola_bar");
         getBuilder("glow_berry_bar").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
                 .texture("layer0", "item/glow_berry_bar");
+        getBuilder("crawler_spawn_egg").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
+                .texture("layer0", "minecraft:item/spawn_egg");
     }
 }

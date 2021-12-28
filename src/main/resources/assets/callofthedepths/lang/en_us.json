@@ -1,6 +1,8 @@
 {
+  "itemgroup.callofthedepths.callofthedepthsitems": "Call of the Depths",
   "block.callofthedepths.rope_block": "Caving Rope",
   "item.callofthedepths.granola_bar": "Granola Bar",
   "item.callofthedepths.glow_berry_bar": "Glow Berry Bar",
+  "item.callofthedepths.crawler_spawn_egg": "Crawler Spawn Egg",
   "item.callofthedepths.torch_arrow": "Torch Arrow"
 }

@@ -9,10 +9,13 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.fml.event.lifecycle.*;
+import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.registry.COTDBlocks;
@@ -48,6 +51,7 @@ public class CallOfTheDepths {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onPostSetup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModelBakeEvent);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -81,6 +85,7 @@ public class CallOfTheDepths {
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
+        EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
 
         ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
     }
@@ -93,6 +98,10 @@ public class CallOfTheDepths {
                 return arrow;
             }
         });
+    }
+
+    public void onModelBakeEvent(ModelBakeEvent evt) {
+
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
