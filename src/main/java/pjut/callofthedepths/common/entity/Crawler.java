@@ -7,6 +7,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -15,7 +16,10 @@ public class Crawler extends Monster {
     public Crawler(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         this.moveControl = new MoveControl(this);
+        this.navigation = new ClimbPathNavigation(this, level);
     }
+
+
 
     @Override
     protected void registerGoals() {

@@ -21,5 +21,9 @@ build
 eclipse
 run
 
+# notes
+_current.txt
+_future.txt
+
 # Files from Forge MDK
 forge*changelog.txt
