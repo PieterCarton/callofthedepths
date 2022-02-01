@@ -52,7 +52,7 @@ public class Crawler extends Monster {
 
     @Override
     public boolean onClimbable() {
-        return this.horizontalCollision;
+        return false;//this.horizontalCollision;
     }
 
     public class MoveAbovePlayerGoal extends Goal {
@@ -105,14 +105,7 @@ public class Crawler extends Monster {
 
         @Override
         public void start() {
-            System.out.println("Target before: " + targetPos.toShortString());
             this.mob.getNavigation().moveTo(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.0D);
-            /*
-            Node end = this.mob.getNavigation().getPath().getEndNode();
-            if (end != null) {
-                System.out.println("Target after: " + end.toString());
-            }
-             */
         }
 
         @Override

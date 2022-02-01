@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -38,7 +37,7 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
                 ++i;
                 blockstate = this.level.getBlockState(blockpos$mutableblockpos.set(this.mob.getX(), (double) i, this.mob.getZ()));
             }
-        } else if (this.mob.isOnGround() || this.hasClimbableWall(blockpos$mutableblockpos)) {
+        } else if (this.mob.isOnGround() || this.hasWallToSide(blockpos$mutableblockpos)) {
             i = Mth.floor(this.mob.getY() + 0.5D);
         } else {
             BlockPos blockpos;
@@ -74,20 +73,62 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
         return this.getCachedBlockType(p_77573_, p_77574_.getX(), p_77574_.getY(), p_77574_.getZ());
     }
 
-    private boolean hasClimbableWall(BlockPos pos) {
-        boolean climbable = false;
-        for (BlockPos position: ImmutableSet.of(pos.above(), pos.east(), pos.west(), pos.north(), pos.south())) {
-            climbable |= this.level.getBlockState(pos).isCollisionShapeFullBlock(this.level, pos);
-        }
-        return climbable;
-    }
-
     @Override
     public int getNeighbors(Node[] nodes, Node node) {
         int i = super.getNeighbors(nodes, node);
 
-        nodes[i++] = this.getNode(node.x, node.y + 1, node.z);
+        Node above = this.getNode(node.asBlockPos().above());
+        if (!above.closed && hasWallToSide(above.asBlockPos())) {
+            nodes[i++] = above;
+        }
+
+        // add nodes in horizontal direction iff they do not have ground beneath
+        // north
+        Node north = this.getNode(node.asBlockPos().north());
+        if (!north.closed && hasCeilingAbove(north.asBlockPos()) && !hasGroundUnderneath(north.asBlockPos())) {
+            nodes[i++] = north;
+        }
+
+        // south
+        Node south = this.getNode(node.asBlockPos().south());
+        if (!south.closed && hasCeilingAbove(south.asBlockPos()) && !hasGroundUnderneath(south.asBlockPos())) {
+            nodes[i++] = this.getNode(node.x, node.y, node.z + 1);
+        }
+
+        // east
+        Node east = this.getNode(node.asBlockPos().east());
+        if (!east.closed && hasCeilingAbove(east.asBlockPos()) && !hasGroundUnderneath(east.asBlockPos())) {
+            nodes[i++] = this.getNode(node.x + 1, node.y, node.z);
+        }
+
+        // west
+        Node west = this.getNode(node.asBlockPos().west());
+        if (!west.closed && hasCeilingAbove(west.asBlockPos()) && !hasGroundUnderneath(west.asBlockPos())) {
+            nodes[i++] = this.getNode(node.x - 1, node.y, node.z);
+        }
 
         return i;
+    }
+
+    private boolean hasWallToSide(BlockPos pos) {
+        boolean climbable = false;
+
+        // must not be inside block
+        if (this.level.getBlockState(pos).getMaterial().isSolid()) {
+            return false;
+        }
+
+        for (BlockPos position: ImmutableSet.of(pos.above(), pos.east(), pos.west(), pos.north(), pos.south())) {
+            climbable |= this.level.getBlockState(position).getMaterial().isSolid();
+        }
+        return climbable;
+    }
+
+    private boolean hasGroundUnderneath(BlockPos blockPos) {
+        return level.getBlockState(blockPos.below()).getMaterial().isSolid();
+    }
+
+    private boolean hasCeilingAbove(BlockPos blockPos) {
+        return level.getBlockState(blockPos.above()).getMaterial().isSolid();
     }
 }
