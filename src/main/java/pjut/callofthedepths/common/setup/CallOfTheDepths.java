@@ -14,12 +14,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
+import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
+import pjut.callofthedepths.common.registry.COTDFeatures;
 import pjut.callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,8 +46,10 @@ public class CallOfTheDepths {
         COTDItems.init();
         COTDBlocks.init();
         COTDEntityTypes.init();
+        COTDFeatures.init();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(COTDFeaturePlacement::register);
         // Register the enqueueIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
