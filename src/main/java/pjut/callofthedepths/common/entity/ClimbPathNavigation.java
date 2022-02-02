@@ -1,22 +1,29 @@
 package pjut.callofthedepths.common.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 import pjut.callofthedepths.client.debug.DebugEventHandler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClimbPathNavigation extends PathNavigation {
+    private Crawler crawler;
     private NodeEvaluator nodeEvaluator;
 
-    public ClimbPathNavigation(Mob p_26448_, Level p_26449_) {
-        super(p_26448_, p_26449_);
+    public ClimbPathNavigation(Crawler mob, Level level) {
+        super(mob, level);
+        crawler = mob;
     }
 
     @Override
@@ -28,7 +35,7 @@ public class ClimbPathNavigation extends PathNavigation {
 
     // TODO: should be able to update while climbing as well
     protected boolean canUpdatePath() {
-        return this.mob.isOnGround() || this.isInLiquid() || this.mob.isPassenger();
+        return this.mob.isOnGround() || this.isInLiquid() || this.mob.isPassenger() || this.mob.getEntityData().get(Crawler.IS_CLIMBING);
     }
 
     protected Vec3 getTempMobPos() {
@@ -49,7 +56,6 @@ public class ClimbPathNavigation extends PathNavigation {
         return path;
     }
 
-    // TODO: override tick so target position not always on ground
     @Override
     public void tick() {
         ++this.tick;
@@ -71,8 +77,47 @@ public class ClimbPathNavigation extends PathNavigation {
             if (!this.isDone()) {
                 Vec3 vec31 = this.path.getNextEntityPos(this.mob);
                 this.mob.getMoveControl().setWantedPosition(vec31.x, vec31.y, vec31.z, this.speedModifier);
+
+                if (this.path.getNextNode().type == BlockPathTypes.OPEN) {
+                    this.mob.getEntityData().set(Crawler.IS_CLIMBING, true);
+                    System.out.println("start climbing");
+
+                    // get new targetOrientationDirection
+                    Direction newTargetOrientation = getTargetOrientation(this.path.getPreviousNode().asBlockPos(),this.path.getNextNodePos(), level, this.crawler.getOrientation());
+                    System.out.println(newTargetOrientation.toString());
+                    this.crawler.setTargetClimbOrientation(newTargetOrientation);
+                } else {
+                    this.mob.getEntityData().set(Crawler.IS_CLIMBING, false);
+                    System.out.println("stop climbing");
+                }
             }
         }
+    }
+
+    protected static Direction getTargetOrientation(BlockPos current, BlockPos next, BlockGetter blockGetter, Direction currentOrientation) {
+        List<Direction> validDirections = new ArrayList<>(6);
+
+        BlockPos relativeDirection = current.subtract(next);
+        Direction travelDirection = Direction.fromNormal(relativeDirection);
+
+        for (Direction direction: Direction.values()) {
+            // valid climb direction must be orthogonal to travelDirection
+            // there must be a solid block in this direction from the next blockPos
+            if (direction != travelDirection && direction != travelDirection.getOpposite()
+                    && blockGetter.getBlockState(next.relative(direction)).getMaterial().isSolid()) {
+                if (direction == currentOrientation) {
+                    return direction;
+                }
+                validDirections.add(direction);
+            }
+        }
+
+        if (validDirections.isEmpty()) {
+            return null;
+        }
+
+        // should get closest to currentDirection in future
+        return validDirections.get(0);
     }
 
     public void setCanOpenDoors(boolean p_26441_) {

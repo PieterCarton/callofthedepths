@@ -2,6 +2,10 @@ package pjut.callofthedepths.common.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -9,36 +13,30 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.Node;
 
 public class Crawler extends Monster {
+    public static final EntityDataAccessor<Boolean> IS_CLIMBING = SynchedEntityData.defineId(Crawler.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Direction> CLIMB_ORIENTATION = SynchedEntityData.defineId(Crawler.class, EntityDataSerializers.DIRECTION);
+
+    private Direction targetClimbOrientation = Direction.DOWN;
 
     public static final int MIN_DROP_HEIGHT = 4;
 
     public Crawler(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new MoveControl(this);
+        //this.moveControl = new MoveControl(this);
+        this.moveControl = new CrawlerMoveControl(this, 10, true);
         this.navigation = new ClimbPathNavigation(this, level);
     }
-
-
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new MoveAbovePlayerGoal(this, 32));
-        //this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, false));
-        //this.goalSelector.addGoal(3, new RandomStrollGoal(this, 1.0D));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
@@ -47,14 +45,30 @@ public class Crawler extends Monster {
                 .add(Attributes.FOLLOW_RANGE, 35.0D)
                 .add(Attributes.MOVEMENT_SPEED, (double)0.23F)
                 .add(Attributes.ATTACK_DAMAGE, 2.0D)
+                .add(Attributes.FLYING_SPEED, 0.23F)
                 .build();
     }
 
     @Override
-    public boolean onClimbable() {
-        return false;//this.horizontalCollision;
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(IS_CLIMBING, false);
+        this.entityData.define(CLIMB_ORIENTATION, Direction.DOWN);
     }
 
+    public Direction getTargetClimbOrientation() {
+        return targetClimbOrientation;
+    }
+
+    public void setTargetClimbOrientation(Direction targetClimbOrientation) {
+        this.targetClimbOrientation = targetClimbOrientation;
+    }
+
+    public Direction getOrientation() {
+        return this.entityData.get(CLIMB_ORIENTATION);
+    }
+
+    // Crawler does not seem to not be able to reuse goal
     public class MoveAbovePlayerGoal extends Goal {
 
         private BlockPos playerPos;
@@ -115,17 +129,70 @@ public class Crawler extends Monster {
     }
 
     public class CrawlerMoveControl extends MoveControl {
+        private final int maxTurn;
+        private final boolean hoversInPlace;
 
-        public CrawlerMoveControl(Mob p_24983_) {
-            super(p_24983_);
+        public CrawlerMoveControl(Mob mob, int maxTurn, boolean hoversInPlace) {
+            super(mob);
+            this.maxTurn = maxTurn;
+            this.hoversInPlace = hoversInPlace;
         }
 
         @Override
         public void tick() {
-            // if on ground: super code
-            super.tick();
+            if (this.mob.getEntityData().get(IS_CLIMBING)) {
+                climbTick();
+            } else {
+                this.mob.setNoGravity(false);
+                super.tick();
+            }
 
-            // if climbing: custom code
+        }
+
+        public void climbTick() {
+            // priority 1: move against wall mob is climbing on
+            float crawlerWidth = this.mob.getBbWidth();
+            float crawlerHeight = this.mob.getBbHeight();
+
+            // priority 2: move to next goal along
+            if (this.operation == MoveControl.Operation.MOVE_TO) {
+                this.operation = MoveControl.Operation.WAIT;
+                this.mob.setNoGravity(true);
+                double d0 = this.wantedX - this.mob.getX();
+                double d1 = this.wantedY - this.mob.getY();
+                double d2 = this.wantedZ - this.mob.getZ();
+                double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+                if (d3 < (double)2.5000003E-7F) {
+                    this.mob.setYya(0.0F);
+                    this.mob.setZza(0.0F);
+                    return;
+                }
+
+                float f = (float)(Mth.atan2(d2, d0) * (double)(180F / (float)Math.PI)) - 90.0F;
+                this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f, 90.0F));
+                float f1;
+                if (this.mob.isOnGround()) {
+                    f1 = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                } else {
+                    f1 = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
+                }
+
+                this.mob.setSpeed(f1);
+                double d4 = Math.sqrt(d0 * d0 + d2 * d2);
+                if (Math.abs(d1) > (double)1.0E-5F || Math.abs(d4) > (double)1.0E-5F) {
+                    float f2 = (float)(-(Mth.atan2(d1, d4) * (double)(180F / (float)Math.PI)));
+                    this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f2, (float)this.maxTurn));
+                    this.mob.setYya(d1 > 0.0D ? f1 : -f1);
+                }
+            } else {
+                if (!this.hoversInPlace) {
+                    this.mob.setNoGravity(false);
+                }
+
+                this.mob.setYya(0.0F);
+                this.mob.setZza(0.0F);
+            }
+
         }
     }
 }

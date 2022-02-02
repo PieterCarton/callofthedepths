@@ -1,7 +1,9 @@
 package pjut.callofthedepths.common.entity;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.Blocks;
@@ -78,6 +80,7 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
         int i = super.getNeighbors(nodes, node);
 
         Node above = this.getNode(node.asBlockPos().above());
+        Direction wallDirection = getClimbableWallDirection(above);
         if (!above.closed && hasWallToSide(above.asBlockPos())) {
             nodes[i++] = above;
         }
@@ -108,6 +111,23 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
         }
 
         return i;
+    }
+
+    private Direction getClimbableWallDirection(Node node) {
+        BlockPos nodePos = node.asBlockPos();
+
+        // must not be inside block
+        if (this.level.getBlockState(nodePos).getMaterial().isSolid()) {
+            return null;
+        }
+
+        for (Direction direction: ImmutableList.of(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST)) {
+            BlockPos position = nodePos.relative(direction);
+            if (this.level.getBlockState(position).getMaterial().isSolid()) {
+                return direction;
+            }
+        }
+        return null;
     }
 
     private boolean hasWallToSide(BlockPos pos) {
