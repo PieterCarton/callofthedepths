@@ -14,5 +14,6 @@ public class COTDBlockModelProvider extends BlockModelProvider {
     @Override
     protected void registerModels() {
         cubeAll("gypsum", new ResourceLocation("callofthedepths:block/gypsum"));
+        cubeAll("silken_husk", new ResourceLocation("callofthedepths:block/silken_husk"));
     }
 }

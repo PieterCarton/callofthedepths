@@ -25,6 +25,7 @@ logs
 # notes
 _current.txt
 _future.txt
+_art.txt
 
 # Files from Forge MDK
 forge*changelog.txt
