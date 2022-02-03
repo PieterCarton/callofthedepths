@@ -1,6 +1,7 @@
 {
   "block.callofthedepths.gypsum": "Gypsum",
   "block.callofthedepths.rope_block": "Caving Rope",
+  "block.callofthedepths.web_carpet": "Web Carpet",
   "entity.callofthedepths.crawler": "Crawler",
   "entity.callofthedepths.torch_arrow": "Torch Arrow",
   "item.callofthedepths.crawler_spawn_egg": "Crawler Spawn Egg",

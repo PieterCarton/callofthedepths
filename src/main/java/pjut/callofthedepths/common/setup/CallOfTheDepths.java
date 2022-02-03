@@ -93,6 +93,7 @@ public class CallOfTheDepths {
         EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
 
         ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.WEB_CARPET.get(), RenderType.tripwire());
     }
 
     public void onPostSetup(FMLLoadCompleteEvent evt) {
