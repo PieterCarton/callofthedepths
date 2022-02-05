@@ -19,6 +19,7 @@ import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
+import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
@@ -65,6 +66,7 @@ public class CallOfTheDepths {
     private void setup(final FMLCommonSetupEvent event)
     {
         System.out.println("CommonSetup");
+        COTDPacketHandler.registerPackets();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)

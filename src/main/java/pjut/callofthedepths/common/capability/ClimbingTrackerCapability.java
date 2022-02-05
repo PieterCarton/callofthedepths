@@ -1,8 +1,10 @@
 package pjut.callofthedepths.common.capability;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -22,6 +24,10 @@ public class ClimbingTrackerCapability {
     public static Capability<ClimbingTracker> CLIMBING_TRACKER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
 
     public static final ResourceLocation CLIMBING_TRACKER_LOCATION = new ResourceLocation(CallOfTheDepths.MOD_ID, "climbing_handler");
+
+    public static LazyOptional<ClimbingTracker> get(Entity entity) {
+        return entity.getCapability(CLIMBING_TRACKER_CAPABILITY, null);
+    }
 
     /**
      * Non-volatile provider for the climbing tracker capability
