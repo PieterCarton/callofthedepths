@@ -57,7 +57,6 @@ public class CallOfTheDepths {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onPostSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModelBakeEvent);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -91,6 +90,7 @@ public class CallOfTheDepths {
 
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
+        // TODO: move into separate classes
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
         EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
 
@@ -106,20 +106,5 @@ public class CallOfTheDepths {
                 return arrow;
             }
         });
-    }
-
-    public void onModelBakeEvent(ModelBakeEvent evt) {
-
-    }
-
-    // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
-    // Event bus for receiving Registry Events)
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            // register a new block here
-            LOGGER.info("HELLO from Register Block");
-        }
     }
 }

@@ -6,6 +6,8 @@ import net.minecraft.server.level.ServerPlayer;
 public class ClimbingTracker {
     private double stableHeight = Double.MAX_VALUE;
     private int jumps = 0;
+
+    // TODO: not synced
     private boolean isSliding = false;
     private boolean isClimbing = false;
     private Direction attachDirection = Direction.NORTH;
