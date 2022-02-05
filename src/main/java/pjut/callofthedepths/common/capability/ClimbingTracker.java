@@ -4,13 +4,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ClimbingTracker {
+    private Direction attachDirection = Direction.NORTH;
     private double stableHeight = Double.MAX_VALUE;
     private int jumps = 0;
 
     // TODO: not synced
     private boolean isSliding = false;
     private boolean isClimbing = false;
-    private Direction attachDirection = Direction.NORTH;
 
     public ClimbingTracker() {}
 
@@ -40,6 +40,10 @@ public class ClimbingTracker {
 
     public void setClimbing(boolean climbing) {
         isClimbing = climbing;
+    }
+
+    public void setAttachDirection(Direction attachDirection) {
+        this.attachDirection = attachDirection;
     }
 
     public Direction getAttachDirection() {
