@@ -1,4 +1,4 @@
-package pjut.callofthedepths.common.data;
+package pjut.callofthedepths.common.data.model;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;

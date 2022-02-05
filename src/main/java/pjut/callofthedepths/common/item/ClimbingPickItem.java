@@ -64,42 +64,6 @@ public class ClimbingPickItem extends PickaxeItem {
         return super.useOn(useOnContext);
     }
 
-    /*
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        System.out.println("use");
-        if (!player.level.isClientSide()) {
-            ServerLevel serverLevel = (ServerLevel) player.level;
-            Vec3 particlePos = player.position();
-            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), particlePos.x(), particlePos.y(), particlePos.z(), 10, 0.0, 0.0, 0.0, 0.3);
-        }
-        if (level.isClientSide() && currentCooldown < 0 && canClimbOnWall(player)) {
-            currentCooldown = USAGE_COOLDOWN;
-            if (player.isNoGravity() == true) {
-                //onRelease(playerIn);
-            } else {
-                player.swing(hand);
-                level.playSound(player, player.blockPosition(), SoundEvents.ANVIL_PLACE, SoundSource.PLAYERS, 1.0f, 1.0f);
-                //onAttach(playerIn);
-            }
-        }
-
-        return super.use(level, player, hand);
-    }
-     */
-
-    @Override
-    public void onUseTick(Level p_41428_, LivingEntity p_41429_, ItemStack p_41430_, int p_41431_) {
-        super.onUseTick(p_41428_, p_41429_, p_41430_, p_41431_);
-        System.out.println("use tick");
-    }
-
-    @Override
-    public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        super.onUsingTick(stack, player, count);
-        System.out.println("using tick");
-    }
-
     private boolean canClimbOnWall(Player player) {
         Direction lookDirection = getLookDirection(player.getLookAngle());
         Vec3i lookDirectionVec = lookDirection.getNormal();
