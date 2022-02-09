@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +30,8 @@ import pjut.callofthedepths.common.capability.ClimbingTrackerCapability;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.network.ClimbingActionPacket;
 
+import java.util.function.Consumer;
+
 public class ClimbingPickItem extends PickaxeItem {
 
     private static final AttributeModifier SLIDE_FALL_SPEED_REDUCTION = new AttributeModifier("Slide fall-speed reduction", -0.06, AttributeModifier.Operation.ADDITION);
@@ -44,8 +47,21 @@ public class ClimbingPickItem extends PickaxeItem {
         this.MAX_JUMPS = maxJumps;
     }
 
+    @Override
+    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
+        if (stack.getDamageValue() == stack.getMaxDamage() - 1) {
+            onRelease((Player)entity);
+        }
+        return super.damageItem(stack, amount, entity, onBroken);
+    }
 
+    @Override
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        onRelease(player);
+        return super.onDroppedByPlayer(item, player);
+    }
 
+    // TODO activate on any right click
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         Player player = useOnContext.getPlayer();
@@ -81,6 +97,13 @@ public class ClimbingPickItem extends PickaxeItem {
         if (!(entityIn instanceof Player player))
             return;
 
+        if (!isHoldingClimbingPick(player)) {
+            onRelease(player);
+        }
+
+        if (!isSelected)
+            return;
+
         LazyOptional<ClimbingTracker> climbingCapability = ClimbingTrackerCapability.get(player);
         ClimbingTracker cap = climbingCapability.orElse(new ClimbingTracker());
 
@@ -108,6 +131,10 @@ public class ClimbingPickItem extends PickaxeItem {
 
         currentCooldown--;
         super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
+    }
+
+    private static boolean isHoldingClimbingPick(Player player) {
+        return player.getMainHandItem().getItem() instanceof ClimbingPickItem || player.getOffhandItem().getItem() instanceof ClimbingPickItem;
     }
 
     private void doWallSlide(Level level, Player player, ClimbingTracker cap) {

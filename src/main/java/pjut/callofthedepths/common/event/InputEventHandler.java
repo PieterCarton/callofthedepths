@@ -1,8 +1,6 @@
 package pjut.callofthedepths.common.event;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
