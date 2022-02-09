@@ -50,18 +50,24 @@ public class ClimbingTracker {
         return attachDirection;
     }
 
-    /**
-     * Increase jumps made by player while climbing by one
-     */
     public void incJumps() {
         this.jumps++;
     }
 
-    /**
-     * Set number of jumps to 0
-     */
     public void setJumps(int jumps) {this.jumps = jumps;};
 
+    /**
+     * Returns true if tracker is at reset value
+     */
+    public boolean isReset() {
+        return jumps == 0 && !isClimbing && !isSliding;
+    }
+
+    public void reset() {
+        jumps = 0;
+        isClimbing = false;
+        isSliding = false;
+    }
 
     public void sendPacketToPlayer(ServerPlayer player) {
         //ClimbingCapabilitySyncPacket packet = new ClimbingCapabilitySyncPacket(writeToNBT(new CompoundNBT()));

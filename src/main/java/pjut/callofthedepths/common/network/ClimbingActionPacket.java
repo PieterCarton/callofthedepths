@@ -1,5 +1,6 @@
 package pjut.callofthedepths.common.network;
 
+import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
@@ -10,40 +11,51 @@ public class ClimbingActionPacket extends ClientToServerPacket {
     public enum ClimbingAction{
         ATTACH,
         RELEASE,
-        LEAP,
-        SLIDE
+        JUMP,
+        SLIDE,
+        LAND
     }
 
     private ClimbingAction action;
+    // TODO: what is the point of this?
     private double playerHeight;
+    private Direction attachDirection;
 
     public ClimbingActionPacket(ClimbingAction action, double playerHeight) {
+        this(action, playerHeight, Direction.NORTH);
+    }
+
+    public ClimbingActionPacket(ClimbingAction action, double playerHeight, Direction attachDirection) {
         this.action = action;
         this.playerHeight = playerHeight;
+        this.attachDirection = attachDirection;
     }
 
     public ClimbingActionPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(ClimbingAction.class);
         this.playerHeight = buffer.readDouble();
+        this.attachDirection = buffer.readEnum(Direction.class);
     }
 
-    // TODO: re-enable once ported
     @Override
     public void handleServerside(NetworkEvent.Context ctx) {
         ClimbingPickItem climbingPick = (ClimbingPickItem) COTDItems.CLIMBING_PICK.get();
         Player player = ctx.getSender();
         switch (action){
-            case LEAP:
-                //climbingPick.onLeap(player);
+            case JUMP:
+                ClimbingPickItem.onJump(player);
                 break;
             case ATTACH:
-                //climbingPick.onAttach(player);
+                climbingPick.onAttach(player, this.attachDirection);
                 break;
             case RELEASE:
-                //climbingPick.onRelease(player);
+                ClimbingPickItem.onRelease(player);
                 break;
             case SLIDE:
-                //climbingPick.onStartSliding(player);
+                ClimbingPickItem.onStartSliding(player);
+                break;
+            case LAND:
+                ClimbingPickItem.onLand(player);
         }
     }
 
@@ -51,5 +63,6 @@ public class ClimbingActionPacket extends ClientToServerPacket {
     public void serialize(FriendlyByteBuf buffer) {
         buffer.writeEnum(action);
         buffer.writeDouble(playerHeight);
+        buffer.writeEnum(this.attachDirection);
     }
 }

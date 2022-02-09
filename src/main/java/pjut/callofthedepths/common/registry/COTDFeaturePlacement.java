@@ -27,7 +27,7 @@ public class COTDFeaturePlacement {
 
     @SubscribeEvent
     public static void addBiomeFeatures(BiomeLoadingEvent evt) {
-        System.out.println("added features to: " + evt.getName());
+        // System.out.println("added features to: " + evt.getName());
         evt.getGeneration().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, POLE);
     }
 }

@@ -29,9 +29,6 @@ import pjut.callofthedepths.common.capability.ClimbingTrackerCapability;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.network.ClimbingActionPacket;
 
-// TODO: stableHeight seems unintuitive, maybe remove
-// TODO: landing very buggy
-// TODO: release on key press event
 public class ClimbingPickItem extends PickaxeItem {
 
     private static final AttributeModifier SLIDE_FALL_SPEED_REDUCTION = new AttributeModifier("Slide fall-speed reduction", -0.06, AttributeModifier.Operation.ADDITION);
@@ -46,6 +43,8 @@ public class ClimbingPickItem extends PickaxeItem {
         super(tier, attackDamageIn, attackSpeedIn, builder);
         this.MAX_JUMPS = maxJumps;
     }
+
+
 
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
@@ -91,13 +90,7 @@ public class ClimbingPickItem extends PickaxeItem {
         Vec3 movement = entityIn.getDeltaMovement();
         // TODO: also cancel sliding
         if (cap.isClimbing() && (!hasSolidWall(player, cap.getAttachDirection()) || movement.x() != 0.0 || movement.z() != 0.0)) {
-            System.out.printf("Released for following reason: wall %b, move x %b, move y %b", !hasSolidWall(player, cap.getAttachDirection()), movement.x() != 0.0, movement.z() != 0.0);
             onRelease(player);
-        }
-
-        // check if player just landed on the ground
-        if ((cap.isClimbing() || cap.isSliding()) && player.isOnGround()) {
-            onLand(player);
         }
 
         if (cap.isSliding()) {
@@ -107,7 +100,6 @@ public class ClimbingPickItem extends PickaxeItem {
         // check for player initiating a wall slide or a new jump
         if (level.isClientSide && cap.isClimbing()) {
             if (Minecraft.getInstance().options.keyJump.isDown()) {
-                System.out.println("jump");
                 onJump(player);
             } else if (player.isCrouching() && !cap.isSliding()) {
                 onStartSliding(player);
@@ -176,7 +168,7 @@ public class ClimbingPickItem extends PickaxeItem {
 
 
     // Executed when player tries jump while climbing
-    public void onJump(Player player) {
+    public static void onJump(Player player) {
         // switch gravity on
         player.setNoGravity(false);
 
@@ -189,7 +181,7 @@ public class ClimbingPickItem extends PickaxeItem {
         if (player.level.isClientSide) {
             // if on client, handle movement and inform server of action
             player.jumpFromGround();
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.LEAP, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.JUMP, player.getY()));
         }
     }
 
@@ -223,7 +215,7 @@ public class ClimbingPickItem extends PickaxeItem {
     }
 
     // Executed when player stops climbing
-    public void onRelease(Player player) {
+    public static void onRelease(Player player) {
         ClimbingTrackerCapability.get(player).ifPresent(cap -> cap.setSliding(false));
         player.setNoGravity(false);
         removeSlidingModifier(player);
@@ -236,21 +228,20 @@ public class ClimbingPickItem extends PickaxeItem {
 
     // TODO: behaviour for water??
     // Executed when player lands on solid ground
-    public void onLand(Player player) {
+    public static void onLand(Player player) {
         // reset number of jumps, stop sliding
-        System.out.println("Side: " + player.level.isClientSide);
-        System.out.println("landed");
-        ClimbingTrackerCapability.get(player).ifPresent(cap -> {
-            cap.setJumps(0);
-            cap.setSliding(false);
-            cap.setClimbing(false);
-        });
+        ClimbingTrackerCapability.get(player)
+                .ifPresent(ClimbingTracker::reset);
 
         player.setNoGravity(false);
         removeSlidingModifier(player);
+
+        if (player.level.isClientSide) {
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.LAND, player.getY()));
+        }
     }
 
-    public void onStartSliding(Player player) {
+    public static void onStartSliding(Player player) {
 
         ClimbingTracker cap = ClimbingTrackerCapability.get(player).orElse(new ClimbingTracker());
 
@@ -270,7 +261,7 @@ public class ClimbingPickItem extends PickaxeItem {
 
     }
 
-    public void addSlidingModifier(Player player) {
+    public static void addSlidingModifier(Player player) {
         // apply sliding attribute modifier, if not already present
         AttributeInstance attributeInstance = player.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get());
         if (!attributeInstance.hasModifier(SLIDE_FALL_SPEED_REDUCTION)) {
@@ -278,7 +269,7 @@ public class ClimbingPickItem extends PickaxeItem {
         }
     }
 
-    public void removeSlidingModifier(Player player) {
+    public static void removeSlidingModifier(Player player) {
         // remove sliding attribute modifier, if present
         AttributeInstance attributeInstance = player.getAttribute(net.minecraftforge.common.ForgeMod.ENTITY_GRAVITY.get());
         if (attributeInstance.hasModifier(SLIDE_FALL_SPEED_REDUCTION)) {
