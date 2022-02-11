@@ -1,4 +1,4 @@
-package pjut.callofthedepths.common.data;
+package pjut.callofthedepths.common.data.model;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -14,5 +14,6 @@ public class COTDBlockModelProvider extends BlockModelProvider {
     @Override
     protected void registerModels() {
         cubeAll("gypsum", new ResourceLocation("callofthedepths:block/gypsum"));
+        cubeAll("silken_husk", new ResourceLocation("callofthedepths:block/silken_husk"));
     }
 }

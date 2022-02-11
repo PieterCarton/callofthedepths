@@ -17,6 +17,7 @@ public class COTDBlockStateProvider extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         simpleBlock(COTDBlocks.GYPSUM.get(), getExistingFile("gypsum"));
+        simpleBlock(COTDBlocks.SILKEN_HUSK.get(), getExistingFile("silken_husk"));
     }
 
     private ModelFile getExistingFile(String name) {

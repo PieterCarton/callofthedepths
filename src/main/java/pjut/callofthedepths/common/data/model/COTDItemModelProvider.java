@@ -1,4 +1,4 @@
-package pjut.callofthedepths.common.data;
+package pjut.callofthedepths.common.data.model;
 
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +26,14 @@ public class COTDItemModelProvider extends ItemModelProvider {
         getBuilder("crawler_spawn_egg").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
                 .texture("layer0", "minecraft:item/spawn_egg")
                 .texture("layer1", "minecraft:item/spawn_egg");
+        getBuilder("web_carpet").parent(getExistingFile(new ResourceLocation("minecraft:item/generated")))
+                .texture("layer0", "block/web_carpet");
+        getBuilder("climbing_pick").parent(getExistingFile(new ResourceLocation("minecraft:item/handheld")))
+                .texture("layer0", "item/climbing_pick");
+        getBuilder("climbing_pick_advanced").parent(getExistingFile(new ResourceLocation("minecraft:item/handheld")))
+                .texture("layer0", "item/climbing_pick_advanced");
 
         getBuilder("gypsum").parent(getExistingFile(new ResourceLocation("callofthedepths:block/gypsum")));
+        getBuilder("silken_husk").parent(getExistingFile(new ResourceLocation("callofthedepths:block/silken_husk")));
     }
 }

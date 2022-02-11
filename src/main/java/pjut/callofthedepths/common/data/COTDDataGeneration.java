@@ -7,6 +7,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import pjut.callofthedepths.common.data.loot.COTDLootTableProvider;
+import pjut.callofthedepths.common.data.model.COTDBlockModelProvider;
+import pjut.callofthedepths.common.data.model.COTDItemModelProvider;
 
 @Mod.EventBusSubscriber(modid = "callofthedepths", bus = Mod.EventBusSubscriber.Bus.MOD)
 public class COTDDataGeneration {

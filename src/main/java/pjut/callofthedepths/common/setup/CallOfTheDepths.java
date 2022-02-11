@@ -14,12 +14,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
+import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
+import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
+import pjut.callofthedepths.common.registry.COTDFeatures;
 import pjut.callofthedepths.common.registry.COTDItems;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,15 +47,16 @@ public class CallOfTheDepths {
         COTDItems.init();
         COTDBlocks.init();
         COTDEntityTypes.init();
+        COTDFeatures.init();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(COTDFeaturePlacement::register);
         // Register the enqueueIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onPostSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModelBakeEvent);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -60,6 +65,7 @@ public class CallOfTheDepths {
     private void setup(final FMLCommonSetupEvent event)
     {
         System.out.println("CommonSetup");
+        COTDPacketHandler.registerPackets();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
@@ -84,10 +90,12 @@ public class CallOfTheDepths {
 
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
+        // TODO: move into separate classes
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
         EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
 
         ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.WEB_CARPET.get(), RenderType.tripwire());
     }
 
     public void onPostSetup(FMLLoadCompleteEvent evt) {
@@ -98,20 +106,5 @@ public class CallOfTheDepths {
                 return arrow;
             }
         });
-    }
-
-    public void onModelBakeEvent(ModelBakeEvent evt) {
-
-    }
-
-    // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
-    // Event bus for receiving Registry Events)
-    @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            // register a new block here
-            LOGGER.info("HELLO from Register Block");
-        }
     }
 }
