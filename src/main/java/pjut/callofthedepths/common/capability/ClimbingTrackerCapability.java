@@ -61,8 +61,9 @@ public class ClimbingTrackerCapability {
         @Override
         public CompoundTag serializeNBT() {
             CompoundTag nbt = new CompoundTag();
-            System.out.println("capability saved");
 
+            nbt.putBoolean("Is Climbing", instance.isClimbing());
+            nbt.putInt("Direction", instance.getAttachDirection().ordinal());
             nbt.putInt("Jumps", instance.getJumps());
             nbt.putDouble("Stable Height", instance.getStableHeight());
 
@@ -71,6 +72,8 @@ public class ClimbingTrackerCapability {
 
         @Override
         public void deserializeNBT(CompoundTag nbt) {
+            instance.setClimbing(nbt.getBoolean("Is Climbing"));
+            instance.setAttachDirection(Direction.values()[nbt.getInt("Direction")]);
             instance.setJumps(nbt.getInt("Jumps"));
             instance.setStableHeight(nbt.getDouble("Stable Height"));
         }

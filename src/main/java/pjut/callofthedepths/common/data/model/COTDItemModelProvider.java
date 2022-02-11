@@ -30,6 +30,8 @@ public class COTDItemModelProvider extends ItemModelProvider {
                 .texture("layer0", "block/web_carpet");
         getBuilder("climbing_pick").parent(getExistingFile(new ResourceLocation("minecraft:item/handheld")))
                 .texture("layer0", "item/climbing_pick");
+        getBuilder("climbing_pick_advanced").parent(getExistingFile(new ResourceLocation("minecraft:item/handheld")))
+                .texture("layer0", "item/climbing_pick_advanced");
 
         getBuilder("gypsum").parent(getExistingFile(new ResourceLocation("callofthedepths:block/gypsum")));
         getBuilder("silken_husk").parent(getExistingFile(new ResourceLocation("callofthedepths:block/silken_husk")));

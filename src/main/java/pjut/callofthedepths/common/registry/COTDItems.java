@@ -40,8 +40,11 @@ public class COTDItems {
             () -> new RopeItem(COTDBlocks.ROPE_BLOCK.get(), getSharedProperties()));
     public static final RegistryObject<Item> CRAWLER_SPAWN_EGG = ITEMS.register("crawler_spawn_egg",
             () -> new ForgeSpawnEggItem(() -> COTDEntityTypes.CRAWLER.get(), 16499171, 10890612, getSharedProperties()));
+
     public static final RegistryObject<Item> CLIMBING_PICK = ITEMS.register("climbing_pick",
             () -> new ClimbingPickItem(Tiers.IRON, 4, 2.0f, getSharedProperties(), 5));
+    public static final RegistryObject<Item> CLIMBING_PICK_ADVANCED = ITEMS.register("climbing_pick_advanced",
+            () -> new ClimbingPickItem(Tiers.DIAMOND, 6, 2.0f, getSharedProperties(), 7));
 
 
     public static void init() {

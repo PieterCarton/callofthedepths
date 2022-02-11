@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "callofthedepths:item/climbing_pick_advanced"
+  }
+}

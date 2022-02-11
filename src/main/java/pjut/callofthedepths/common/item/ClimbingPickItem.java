@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -62,19 +63,12 @@ public class ClimbingPickItem extends PickaxeItem {
     }
 
     // TODO activate on any right click
-    @Override
-    public InteractionResult useOn(UseOnContext useOnContext) {
-        Player player = useOnContext.getPlayer();
-        Level level = useOnContext.getLevel();
-        InteractionHand hand = useOnContext.getHand();
 
-        if (!player.level.isClientSide()) {
-            ServerLevel serverLevel = (ServerLevel) player.level;
-            Vec3 particlePos = player.position();
-            BlockState clickedState = level.getBlockState(useOnContext.getClickedPos());
-            // TODO: fix particle position + better particle
-            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, clickedState), particlePos.x(), particlePos.y(), particlePos.z(), 10, 0.0, 0.0, 0.0, 0.3);
-        }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        boolean attached = false;
+
         if (level.isClientSide() && currentCooldown < 0 && canClimbOnWall(player)) {
             currentCooldown = USAGE_COOLDOWN;
             if (player.isNoGravity()) {
@@ -83,14 +77,31 @@ public class ClimbingPickItem extends PickaxeItem {
                 player.swing(hand);
                 // TODO: fix sound
                 level.playSound(player, player.blockPosition(), SoundEvents.ANVIL_BREAK, SoundSource.PLAYERS, 1.0f, 1.0f);
-                onAttach(player, getLookDirection(player.getLookAngle()));
+                onAttach(player, getLookDirection(player.getLookAngle()), MAX_JUMPS);
+                attached = true;
             }
         }
 
-        return super.useOn(useOnContext);
+        if (attached && !player.level.isClientSide()) {
+            ServerLevel serverLevel = (ServerLevel) player.level;
+            Vec3 particlePos = player.position();
+            BlockPos attachmentPos = getAttachmentPos(player);
+            BlockState clickedState = level.getBlockState(attachmentPos);
+            // TODO: fix particle position + better particle
+            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, clickedState), particlePos.x(), particlePos.y(), particlePos.z(), 10, 0.0, 0.0, 0.0, 0.3);
+        }
+
+        return super.use(level, player, hand);
     }
 
+    private static BlockPos getAttachmentPos(Player player) {
+        Level level = player.getLevel();
+        Direction attachmentDirection = ClimbingTrackerCapability.get(player).orElse(new ClimbingTracker()).getAttachDirection();
+        BlockPos upperLookBlockPos = player.blockPosition().offset(attachmentDirection.getNormal());
+        BlockPos lowerLookBlockPos = upperLookBlockPos.below();
 
+        return level.getBlockState(upperLookBlockPos).getMaterial().isSolid() ? upperLookBlockPos : lowerLookBlockPos;
+    }
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
@@ -113,6 +124,8 @@ public class ClimbingPickItem extends PickaxeItem {
         Vec3 movement = entityIn.getDeltaMovement();
         // TODO: also cancel sliding
         if (cap.isClimbing() && (!hasSolidWall(player, cap.getAttachDirection()) || movement.x() != 0.0 || movement.z() != 0.0)) {
+            System.out.println("Side is client: " + level.isClientSide());
+            System.out.println("released because no solid wall: " + hasSolidWall(player, cap.getAttachDirection()));
             onRelease(player);
         }
 
@@ -141,7 +154,7 @@ public class ClimbingPickItem extends PickaxeItem {
         player.fallDistance = 0.0f;
         if (!player.isCrouching() && cap.getStableHeight() >= player.getY() && level.isClientSide) {
             // attach once again when stable height has been reached
-            onAttach(player, cap.getAttachDirection());
+            onAttach(player, cap.getAttachDirection(), MAX_JUMPS);
         }
 
         if(player.tickCount % 3 == 0) {
@@ -208,17 +221,17 @@ public class ClimbingPickItem extends PickaxeItem {
         if (player.level.isClientSide) {
             // if on client, handle movement and inform server of action
             player.jumpFromGround();
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.JUMP, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.JUMP));
         }
     }
 
      // Executed when player tries to attach to wall
-    public void onAttach(Player player, Direction attachDirection) {
+    public static void onAttach(Player player, Direction attachDirection, int maxJumps) {
 
         ClimbingTracker cap = ClimbingTrackerCapability.get(player).orElse(new ClimbingTracker());
 
         // if player is no longer allowed to attach, start sliding
-        if (cap.getJumps() >= MAX_JUMPS && cap.getStableHeight() < player.getY()) {
+        if (cap.getJumps() >= maxJumps && cap.getStableHeight() < player.getY()) {
             onStartSliding(player);
             return;
         }
@@ -237,7 +250,7 @@ public class ClimbingPickItem extends PickaxeItem {
         if (player.level.isClientSide) {
             // if on client, handle movement and inform server of action
             player.setDeltaMovement(Vec3.ZERO);
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.ATTACH, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.ATTACH, attachDirection));
         }
     }
 
@@ -249,7 +262,7 @@ public class ClimbingPickItem extends PickaxeItem {
 
         if (player.level.isClientSide) {
             // if on client, inform server of action
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.RELEASE, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.RELEASE));
         }
     }
 
@@ -264,7 +277,7 @@ public class ClimbingPickItem extends PickaxeItem {
         removeSlidingModifier(player);
 
         if (player.level.isClientSide) {
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.LAND, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.LAND));
         }
     }
 
@@ -283,7 +296,7 @@ public class ClimbingPickItem extends PickaxeItem {
         // if on client, handle movement and inform server of action
         if (player.level.isClientSide) {
             player.setDeltaMovement(Vec3.ZERO);
-            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.SLIDE, player.getY()));
+            COTDPacketHandler.INSTANCE.sendToServer(new ClimbingActionPacket(ClimbingActionPacket.ClimbingAction.SLIDE));
         }
 
     }
