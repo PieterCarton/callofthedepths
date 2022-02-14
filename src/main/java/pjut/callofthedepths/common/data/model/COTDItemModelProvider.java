@@ -34,6 +34,11 @@ public class COTDItemModelProvider extends ItemModelProvider {
                 .texture("layer0", "item/climbing_pick_advanced");
 
         getBuilder("gypsum").parent(getExistingFile(new ResourceLocation("callofthedepths:block/gypsum")));
+        getBuilder("gypsum_stairs").parent(getExistingFile(new ResourceLocation("callofthedepths:block/gypsum_stairs")));
+        getBuilder("gypsum_slab").parent(getExistingFile(new ResourceLocation("callofthedepths:block/gypsum_slab")));
+        getBuilder("polished_gypsum").parent(getExistingFile(new ResourceLocation("callofthedepths:block/polished_gypsum")));
+        getBuilder("polished_gypsum_stairs").parent(getExistingFile(new ResourceLocation("callofthedepths:block/polished_gypsum_stairs")));
+        getBuilder("polished_gypsum_slab").parent(getExistingFile(new ResourceLocation("callofthedepths:block/polished_gypsum_slab")));
         getBuilder("silken_husk").parent(getExistingFile(new ResourceLocation("callofthedepths:block/silken_husk")));
     }
 }

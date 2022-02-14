@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=top": {
+      "model": "callofthedepths:block/gypsum_slab_top"
+    },
+    "type=bottom": {
+      "model": "callofthedepths:block/gypsum_slab"
+    },
+    "type=double": {
+      "model": "callofthedepths:block/gypsum"
+    }
+  }
+}

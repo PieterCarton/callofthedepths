@@ -2,10 +2,14 @@ package pjut.callofthedepths.common.registry;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.MultifaceBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -22,8 +26,21 @@ public class COTDBlocks {
             () -> new RopeBlock(BlockBehaviour.Properties.of(Material.WOOL).sound(SoundType.WOOL).noOcclusion()));
     public static final RegistryObject<Block> SILKEN_HUSK = registerWithItem("silken_husk",
             () -> new Block(BlockBehaviour.Properties.of(Material.WOOL).sound(SoundType.WOOL)));
+
     public static final RegistryObject<Block> GYPSUM = registerWithItem("gypsum",
             () -> new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+    public static final RegistryObject<Block> GYPSUM_STAIRS = registerWithItem("gypsum_stairs",
+            () -> new StairBlock(() -> GYPSUM.get().defaultBlockState(), BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+    public static final RegistryObject<Block> GYPSUM_SLAB = registerWithItem("gypsum_slab",
+            () -> new SlabBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+
+    public static final RegistryObject<Block> POLISHED_GYPSUM = registerWithItem("polished_gypsum",
+            () -> new Block(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+    public static final RegistryObject<Block> POLISHED_GYPSUM_STAIRS = registerWithItem("polished_gypsum_stairs",
+            () -> new StairBlock(() -> POLISHED_GYPSUM.get().defaultBlockState(), BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+    public static final RegistryObject<Block> POLISHED_GYPSUM_SLAB = registerWithItem("polished_gypsum_slab",
+            () -> new SlabBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(1.5F, 6.0F)));
+
     public static final RegistryObject<Block> WEB_CARPET = registerWithItem("web_carpet",
             () -> new MultifaceBlock(BlockBehaviour.Properties.of(Material.WEB).requiresCorrectToolForDrops().strength(1.5F, 6.0F).jumpFactor(0.8f).speedFactor(0.2f).noOcclusion().noCollission()));
 
