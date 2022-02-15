@@ -46,6 +46,9 @@ public class COTDItems {
     public static final RegistryObject<Item> CLIMBING_PICK_ADVANCED = ITEMS.register("climbing_pick_advanced",
             () -> new ClimbingPickItem(Tiers.DIAMOND, 6, 2.0f, getSharedProperties(), 7));
 
+    public static final RegistryObject<Item> FRACTURED_CARAPACE = ITEMS.register("fractured_carapace",
+            () -> new Item(getSharedProperties()));
+
 
     public static void init() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
