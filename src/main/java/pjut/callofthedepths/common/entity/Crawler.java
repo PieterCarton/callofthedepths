@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -20,10 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class Crawler extends Monster {
-    public static final EntityDataAccessor<Boolean> IS_CLIMBING = SynchedEntityData.defineId(Crawler.class, EntityDataSerializers.BOOLEAN);
-    public static final EntityDataAccessor<Direction> CLIMB_ORIENTATION = SynchedEntityData.defineId(Crawler.class, EntityDataSerializers.DIRECTION);
-
-    private Direction targetClimbOrientation = Direction.DOWN;
+    private static final EntityDataAccessor<Boolean> IS_CLIMBING = SynchedEntityData.defineId(Crawler.class, EntityDataSerializers.BOOLEAN);
 
     public static final int MIN_DROP_HEIGHT = 4;
 
@@ -36,7 +34,10 @@ public class Crawler extends Monster {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new MoveAbovePlayerGoal(this, 32));
+        this.goalSelector.addGoal(1, new CrawlerDropOnPlayerGoal(this));
+        this.goalSelector.addGoal(2, new MoveAbovePlayerGoal(this, 32));
+
+        // use for target selection
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
@@ -53,20 +54,16 @@ public class Crawler extends Monster {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(IS_CLIMBING, false);
-        this.entityData.define(CLIMB_ORIENTATION, Direction.DOWN);
     }
 
-    public Direction getTargetClimbOrientation() {
-        return targetClimbOrientation;
+    public void setClimbing(boolean isClimbing) {
+        this.entityData.set(IS_CLIMBING, isClimbing);
     }
 
-    public void setTargetClimbOrientation(Direction targetClimbOrientation) {
-        this.targetClimbOrientation = targetClimbOrientation;
+    public boolean isClimbing() {
+        return this.entityData.get(IS_CLIMBING);
     }
 
-    public Direction getOrientation() {
-        return this.entityData.get(CLIMB_ORIENTATION);
-    }
 
     // Crawler does not seem to not be able to reuse goal
     public class MoveAbovePlayerGoal extends Goal {
@@ -74,7 +71,7 @@ public class Crawler extends Monster {
         private BlockPos playerPos;
         private BlockPos targetPos;
 
-        private Player nearestPlayer;
+        private LivingEntity nearestPlayer;
         private PathfinderMob mob;
         private int maxHeight;
 
@@ -85,7 +82,7 @@ public class Crawler extends Monster {
 
         @Override
         public boolean canUse() {
-            nearestPlayer = this.mob.getLevel().getNearestPlayer(mob, 32);
+            nearestPlayer = this.mob.getTarget();
 
             if (nearestPlayer != null) {
                 BlockPos.MutableBlockPos mutableBlockPos = nearestPlayer.blockPosition().mutable();
@@ -151,10 +148,8 @@ public class Crawler extends Monster {
 
         public void climbTick() {
             // priority 1: move against wall mob is climbing on
-            float crawlerWidth = this.mob.getBbWidth();
-            float crawlerHeight = this.mob.getBbHeight();
+            // priority 2: move to next goal along wall
 
-            // priority 2: move to next goal along
             if (this.operation == MoveControl.Operation.MOVE_TO) {
                 this.operation = MoveControl.Operation.WAIT;
                 this.mob.setNoGravity(true);

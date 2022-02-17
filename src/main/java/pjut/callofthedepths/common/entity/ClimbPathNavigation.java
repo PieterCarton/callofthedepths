@@ -12,6 +12,7 @@ import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.system.CallbackI;
 import pjut.callofthedepths.client.debug.DebugEventHandler;
 
 import java.util.ArrayList;
@@ -21,9 +22,9 @@ public class ClimbPathNavigation extends PathNavigation {
     private Crawler crawler;
     private NodeEvaluator nodeEvaluator;
 
-    public ClimbPathNavigation(Crawler mob, Level level) {
-        super(mob, level);
-        crawler = mob;
+    public ClimbPathNavigation(Crawler crawler, Level level) {
+        super(crawler, level);
+        this.crawler = crawler;
     }
 
     @Override
@@ -33,13 +34,12 @@ public class ClimbPathNavigation extends PathNavigation {
         return new PathFinder(this.nodeEvaluator, range);
     }
 
-    // TODO: should be able to update while climbing as well
     protected boolean canUpdatePath() {
-        return this.mob.isOnGround() || this.isInLiquid() || this.mob.isPassenger() || this.mob.getEntityData().get(Crawler.IS_CLIMBING);
+        return this.crawler.isOnGround() || this.isInLiquid() || this.crawler.isPassenger() || this.crawler.isClimbing();
     }
 
     protected Vec3 getTempMobPos() {
-        return new Vec3(this.mob.getX(), this.mob.getY(), this.mob.getZ());
+        return new Vec3(this.crawler.getX(), this.crawler.getY(), this.crawler.getZ());
     }
 
 
@@ -50,16 +50,18 @@ public class ClimbPathNavigation extends PathNavigation {
         Path path = super.createPath(p_26475_, p_26476_);
 
         if (path != null) {
-            DebugEventHandler.addPath(this.mob.getId(), path);
+            DebugEventHandler.addPath(this.crawler.getId(), path);
         }
 
         return path;
     }
 
+    // issue: does not recognize starting pos of path in air, and moves it to ground level
     @Override
     public void tick() {
         ++this.tick;
         if (this.hasDelayedRecomputation) {
+            System.out.println("recomputeted");
             this.recomputePath();
         }
 
@@ -67,31 +69,32 @@ public class ClimbPathNavigation extends PathNavigation {
             if (this.canUpdatePath()) {
                 this.followThePath();
             } else if (this.path != null && !this.path.isDone()) {
-                Vec3 vec3 = this.path.getNextEntityPos(this.mob);
-                if (this.mob.getBlockX() == Mth.floor(vec3.x) && this.mob.getBlockY() == Mth.floor(vec3.y) && this.mob.getBlockZ() == Mth.floor(vec3.z)) {
+                Vec3 vec3 = this.path.getNextEntityPos(this.crawler);
+                if (this.crawler.getBlockX() == Mth.floor(vec3.x) && this.crawler.getBlockY() == Mth.floor(vec3.y) && this.crawler.getBlockZ() == Mth.floor(vec3.z)) {
                     this.path.advance();
                 }
             }
 
-            DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
+            DebugPackets.sendPathFindingPacket(this.level, this.crawler, this.path, this.maxDistanceToWaypoint);
             if (!this.isDone()) {
-                Vec3 vec31 = this.path.getNextEntityPos(this.mob);
-                this.mob.getMoveControl().setWantedPosition(vec31.x, vec31.y, vec31.z, this.speedModifier);
+                Vec3 nextPos = this.path.getNextEntityPos(this.crawler);
+                System.out.printf("Next entity pos: %s \n", nextPos.toString());
+                System.out.printf("Current Index: %s \n", this.path.getNextNodeIndex());
+                //System.out.printf("Final pos: %s \n", this.path.getEndNode().toString());
+                this.crawler.getMoveControl().setWantedPosition(nextPos.x, nextPos.y, nextPos.z, this.speedModifier);
 
-                if (this.path.getNextNode().type == BlockPathTypes.OPEN) {
-                    this.mob.getEntityData().set(Crawler.IS_CLIMBING, true);
-                    System.out.println("start climbing");
-
-                    // get new targetOrientationDirection
-                    Direction newTargetOrientation = getTargetOrientation(this.path.getPreviousNode().asBlockPos(),this.path.getNextNodePos(), level, this.crawler.getOrientation());
-                    System.out.println(newTargetOrientation.toString());
-                    this.crawler.setTargetClimbOrientation(newTargetOrientation);
+                if (this.path.getNextNode().type == BlockPathTypes.OPEN || this.path.getNextNode().equals(this.path.getEndNode()) /*Do some check of blocks underneath here*/) {
+                    this.crawler.setClimbing(true);
                 } else {
-                    this.mob.getEntityData().set(Crawler.IS_CLIMBING, false);
-                    System.out.println("stop climbing");
+                    //this.crawler.setClimbing(false);
                 }
             }
         }
+    }
+
+    @Override
+    protected void followThePath() {
+        super.followThePath();
     }
 
     protected static Direction getTargetOrientation(BlockPos current, BlockPos next, BlockGetter blockGetter, Direction currentOrientation) {
