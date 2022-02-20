@@ -12,9 +12,11 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -28,8 +30,10 @@ public class Crawler extends Monster {
     public Crawler(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         //this.moveControl = new MoveControl(this);
-        this.moveControl = new CrawlerMoveControl(this, 10, true);
-        this.navigation = new ClimbPathNavigation(this, level);
+        //this.moveControl = new CrawlerMoveControl(this, 10, true);
+        //this.navigation = new ClimbPathNavigation(this, level);
+        this.moveControl = new FlyingMoveControl(this, 10, true);
+        this.navigation = new FlyingPathNavigation(this, level);
     }
 
     @Override
@@ -116,7 +120,7 @@ public class Crawler extends Monster {
 
         @Override
         public void start() {
-            this.mob.getNavigation().moveTo(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.0D);
+            this.mob.getNavigation().moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 1.0D);
         }
 
         @Override

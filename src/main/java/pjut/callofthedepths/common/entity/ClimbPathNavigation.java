@@ -56,12 +56,12 @@ public class ClimbPathNavigation extends PathNavigation {
         return path;
     }
 
-    // issue: does not recognize starting pos of path in air, and moves it to ground level
+    // BLOCKED ?!?!?!
     @Override
     public void tick() {
+        System.out.println(crawler.blockPosition());
         ++this.tick;
         if (this.hasDelayedRecomputation) {
-            System.out.println("recomputeted");
             this.recomputePath();
         }
 
@@ -78,16 +78,21 @@ public class ClimbPathNavigation extends PathNavigation {
             DebugPackets.sendPathFindingPacket(this.level, this.crawler, this.path, this.maxDistanceToWaypoint);
             if (!this.isDone()) {
                 Vec3 nextPos = this.path.getNextEntityPos(this.crawler);
-                System.out.printf("Next entity pos: %s \n", nextPos.toString());
-                System.out.printf("Current Index: %s \n", this.path.getNextNodeIndex());
+                // System.out.printf("Next entity pos: %s \n", nextPos.toString());
+                // System.out.printf("Current Index: %s \n", this.path.getNextNodeIndex());
                 //System.out.printf("Final pos: %s \n", this.path.getEndNode().toString());
-                this.crawler.getMoveControl().setWantedPosition(nextPos.x, nextPos.y, nextPos.z, this.speedModifier);
+                Vec3 wallAllignment = new Vec3(0, 0, 0);
 
                 if (this.path.getNextNode().type == BlockPathTypes.OPEN || this.path.getNextNode().equals(this.path.getEndNode()) /*Do some check of blocks underneath here*/) {
                     this.crawler.setClimbing(true);
+                    if (hasCeilingAbove(new BlockPos(nextPos))) {
+                        wallAllignment.add(0.0, 0.5, 0.0);
+                    }
                 } else {
                     //this.crawler.setClimbing(false);
                 }
+
+                this.crawler.getMoveControl().setWantedPosition(nextPos.x, nextPos.y + wallAllignment.y(), nextPos.z, this.speedModifier);
             }
         }
     }
@@ -95,6 +100,10 @@ public class ClimbPathNavigation extends PathNavigation {
     @Override
     protected void followThePath() {
         super.followThePath();
+    }
+
+    private boolean hasCeilingAbove(BlockPos blockPos) {
+        return level.getBlockState(blockPos.above()).getMaterial().isSolid();
     }
 
     protected static Direction getTargetOrientation(BlockPos current, BlockPos next, BlockGetter blockGetter, Direction currentOrientation) {

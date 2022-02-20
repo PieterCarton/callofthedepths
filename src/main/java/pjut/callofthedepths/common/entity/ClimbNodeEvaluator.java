@@ -26,9 +26,9 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
     // NOTE: if node is blocked, it should be traversed by climbing
     @Override
     public Node getStart() {
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = this.mob.getBlockY();
-        BlockState blockstate = this.level.getBlockState(blockpos$mutableblockpos.set(this.mob.getX(), (double)i, this.mob.getZ()));
+        BlockState blockstate = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
         if (this.canFloat() && this.mob.isInWater()) {
             while (true) {
                 if (!blockstate.is(Blocks.WATER) && blockstate.getFluidState() != Fluids.WATER.getSource(false)) {
@@ -37,9 +37,9 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
                 }
 
                 ++i;
-                blockstate = this.level.getBlockState(blockpos$mutableblockpos.set(this.mob.getX(), (double) i, this.mob.getZ()));
+                blockstate = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double) i, this.mob.getZ()));
             }
-        } else if (this.mob.isOnGround() || this.hasWallToSide(blockpos$mutableblockpos)) {
+        } else if (this.mob.isOnGround() || this.hasWallToSide(mutableBlockPos) || hasCeilingAbove(mutableBlockPos)) {
             i = Mth.floor(this.mob.getY() + 0.5D);
         } else {
             BlockPos blockpos;
@@ -53,8 +53,8 @@ public class ClimbNodeEvaluator extends WalkNodeEvaluator {
         BlockPathTypes blockpathtypes = this.getCachedBlockType(this.mob, blockpos1.getX(), i, blockpos1.getZ());
         if (this.mob.getPathfindingMalus(blockpathtypes) < 0.0F) {
             AABB aabb = this.mob.getBoundingBox();
-            if (this.hasPositiveMalus(blockpos$mutableblockpos.set(aabb.minX, (double)i, aabb.minZ)) || this.hasPositiveMalus(blockpos$mutableblockpos.set(aabb.minX, (double)i, aabb.maxZ)) || this.hasPositiveMalus(blockpos$mutableblockpos.set(aabb.maxX, (double)i, aabb.minZ)) || this.hasPositiveMalus(blockpos$mutableblockpos.set(aabb.maxX, (double)i, aabb.maxZ))) {
-                Node node = this.getNode(blockpos$mutableblockpos);
+            if (this.hasPositiveMalus(mutableBlockPos.set(aabb.minX, (double)i, aabb.minZ)) || this.hasPositiveMalus(mutableBlockPos.set(aabb.minX, (double)i, aabb.maxZ)) || this.hasPositiveMalus(mutableBlockPos.set(aabb.maxX, (double)i, aabb.minZ)) || this.hasPositiveMalus(mutableBlockPos.set(aabb.maxX, (double)i, aabb.maxZ))) {
+                Node node = this.getNode(mutableBlockPos);
                 node.type = this.getBlockPathType(this.mob, node.asBlockPos());
                 node.costMalus = this.mob.getPathfindingMalus(node.type);
                 return node;
