@@ -12,14 +12,17 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.*;
 import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
 import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
+import pjut.callofthedepths.common.registry.COTDBiomes;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
@@ -48,15 +51,18 @@ public class CallOfTheDepths {
         COTDBlocks.init();
         COTDEntityTypes.init();
         COTDFeatures.init();
+        COTDBiomes.init();
+
         // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(COTDFeaturePlacement::register);
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener(this::setup);
+        modEventBus.addListener(COTDFeaturePlacement::register);
         // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+        modEventBus.addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onPostSetup);
+        modEventBus.addListener(this::processIMC);
+        modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(this::onPostSetup);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -66,6 +72,7 @@ public class CallOfTheDepths {
     {
         System.out.println("CommonSetup");
         COTDPacketHandler.registerPackets();
+        COTDBiomes.registerBiomes();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)

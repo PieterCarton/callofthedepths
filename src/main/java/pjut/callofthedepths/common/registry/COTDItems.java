@@ -5,6 +5,7 @@ import net.minecraft.world.item.Tiers;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import pjut.callofthedepths.common.item.COTDFoods;
 import pjut.callofthedepths.common.item.ClimbingPickItem;
+import pjut.callofthedepths.common.item.DebugItem;
 import pjut.callofthedepths.common.item.RopeItem;
 import pjut.callofthedepths.common.setup.CallOfTheDepths;
 import pjut.callofthedepths.common.item.TorchArrowItem;
@@ -48,6 +49,9 @@ public class COTDItems {
 
     public static final RegistryObject<Item> FRACTURED_CARAPACE = ITEMS.register("fractured_carapace",
             () -> new Item(getSharedProperties()));
+
+    public static final RegistryObject<Item> DEBUG_ITEM = ITEMS.register("debug_item",
+            () -> new DebugItem(getSharedProperties()));
 
 
     public static void init() {

@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "pjut.callofthedepths.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "modid.refmap.json",
+  "mixins": [
+    "MixinOverworldBiomeBuilder"
+  ],
+  "client": [
+  ],
+  "minVersion": "0.8"
+}
