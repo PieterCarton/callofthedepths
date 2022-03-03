@@ -42,8 +42,8 @@ public class COTDBiomes {
     }
 
     private static RegistryObject<Biome> registerBiome(String name) {
-        return BIOMES.register(name, () -> OverworldBiomes.jungle());
-        //return BIOMES.register(name, () ->OverworldBiomes.lushCaves());
+        //return BIOMES.register(name, () -> OverworldBiomes.jungle());
+        return BIOMES.register(name, () ->OverworldBiomes.lushCaves());
         /*return BIOMES.register(name, () -> new Biome.BiomeBuilder()
                 .biomeCategory(Biome.BiomeCategory.UNDERGROUND)
                 .downfall(0.0f)
@@ -64,7 +64,7 @@ public class COTDBiomes {
         //BiomeDictionary.addTypes(INFESTED_CAVERNS_KEY, BiomeDictionary.Type.PLATEAU, BiomeDictionary.Type.OVERWORLD, BiomeDictionary.Type.HOT);
         BiomeManager.addAdditionalOverworldBiomes(INFESTED_CAVERNS_KEY);
         BiomeDictionary.addTypes(INFESTED_CAVERNS_KEY, HOT, WET, DENSE, JUNGLE, OVERWORLD);
-        //BiomeManager.addBiome(BiomeManager.BiomeType.WARM, new BiomeManager.BiomeEntry(INFESTED_CAVERNS_KEY, 30));
+        BiomeManager.addBiome(BiomeManager.BiomeType.WARM, new BiomeManager.BiomeEntry(INFESTED_CAVERNS_KEY, 30));
     }
 
     public static void init() {

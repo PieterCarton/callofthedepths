@@ -17,15 +17,12 @@ import java.util.function.Consumer;
 
 
 @Mixin(OverworldBiomeBuilder.class)
-public class MixinOverworldBiomeBuilder {
+public abstract class MixinOverworldBiomeBuilder {
+    @Shadow protected abstract void addUndergroundBiome(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> p_187201_, Climate.Parameter p_187202_, Climate.Parameter p_187203_, Climate.Parameter p_187204_, Climate.Parameter p_187205_, Climate.Parameter p_187206_, float p_187207_, ResourceKey<Biome> p_187208_);
+
     @Inject(at = @At("HEAD"), method = "addBiomes(Ljava/util/function/Consumer;)V")
     private void addUndergroundBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> consumer, CallbackInfo info) {
         System.out.println("Hello from addBiomes!");
-        this.addSurfaceBiome(consumer, Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), 0.0F, COTDBiomes.INFESTED_CAVERNS_KEY);
-    }
-
-    @Shadow
-    private void addSurfaceBiome(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> p_187181_, Climate.Parameter p_187182_, Climate.Parameter p_187183_, Climate.Parameter p_187184_, Climate.Parameter p_187185_, Climate.Parameter p_187186_, float p_187187_, ResourceKey<Biome> p_187188_) {
-        throw new IllegalStateException("Mixin failed to find shadow of addSurfaceBiome");
+        this.addUndergroundBiome(consumer, Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), Climate.Parameter.span(-1.0F, 1.0F), 0.0F, COTDBiomes.INFESTED_CAVERNS_KEY);
     }
 }

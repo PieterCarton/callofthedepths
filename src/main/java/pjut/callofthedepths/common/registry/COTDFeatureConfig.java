@@ -7,6 +7,7 @@ import net.minecraft.world.level.levelgen.placement.RarityFilter;
 
 public class COTDFeatureConfig {
     public static final ConfiguredFeature<?, ?> POLE = FeatureUtils.register("pole", COTDFeatures.POLE.get().configured(FeatureConfiguration.NONE));
+    public static final ConfiguredFeature<?, ?> WEB_PATCH = FeatureUtils.register("web_patch", COTDFeatures.WEB_PATCH.get().configured(FeatureConfiguration.NONE));
 
     public static void init(){};
 }
