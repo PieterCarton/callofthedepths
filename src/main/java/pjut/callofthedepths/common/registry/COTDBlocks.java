@@ -14,6 +14,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import pjut.callofthedepths.common.block.CrockPotBlock;
 import pjut.callofthedepths.common.block.RopeBlock;
 import pjut.callofthedepths.common.setup.CallOfTheDepths;
 
@@ -43,6 +44,9 @@ public class COTDBlocks {
 
     public static final RegistryObject<Block> WEB_CARPET = registerWithItem("web_carpet",
             () -> new MultifaceBlock(BlockBehaviour.Properties.of(Material.WEB).requiresCorrectToolForDrops().strength(1.5F, 6.0F).jumpFactor(0.8f).speedFactor(0.2f).noOcclusion().noCollission()));
+
+    public static final RegistryObject<Block> CROCK_POT = registerWithItem("crock_pot",
+            () -> new CrockPotBlock(BlockBehaviour.Properties.of(Material.STONE)));
 
     public static void init() {
         BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());

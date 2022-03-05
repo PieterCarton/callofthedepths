@@ -23,6 +23,7 @@ import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBiomes;
+import pjut.callofthedepths.common.registry.COTDBlockEntities;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
@@ -55,6 +56,7 @@ public class CallOfTheDepths {
 
         // Register the setup method for modloading
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
         modEventBus.addListener(this::setup);
         modEventBus.addListener(COTDFeaturePlacement::register);
         // Register the enqueueIMC method for modloading

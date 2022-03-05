@@ -24,7 +24,6 @@ public class COTDFeaturePlacement {
     public static PlacedFeature WEB_PATCH;
 
     public static void register(final FMLCommonSetupEvent evt) {
-        System.out.println("PLACED FEATURES REGISTERED!!>!>!>");
         COTDFeatureConfig.init();
         POLE = PlacementUtils.register("pole", COTDFeatureConfig.POLE
                 .placed(NoiseThresholdCountPlacement.of(-0.8D, 15, 4), RarityFilter.onAverageOnceEvery(1), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()));
@@ -37,6 +36,10 @@ public class COTDFeaturePlacement {
     public static void addBiomeFeatures(BiomeLoadingEvent evt) {
         // System.out.println("added features to: " + evt.getName());
         evt.getGeneration().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, POLE);
-        evt.getGeneration().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, WEB_PATCH);
+
+        if (evt.getClimate().temperature > 0.5f) {
+            evt.getGeneration().addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, WEB_PATCH);
+        }
+
     }
 }

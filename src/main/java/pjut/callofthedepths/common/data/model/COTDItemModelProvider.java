@@ -42,5 +42,6 @@ public class COTDItemModelProvider extends ItemModelProvider {
         getBuilder("polished_gypsum_stairs").parent(getExistingFile(new ResourceLocation("callofthedepths:block/polished_gypsum_stairs")));
         getBuilder("polished_gypsum_slab").parent(getExistingFile(new ResourceLocation("callofthedepths:block/polished_gypsum_slab")));
         getBuilder("silken_husk").parent(getExistingFile(new ResourceLocation("callofthedepths:block/silken_husk")));
+        getBuilder("crock_pot").parent(getExistingFile(new ResourceLocation("callofthedepths:block/crock_pot")));
     }
 }

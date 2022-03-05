@@ -27,6 +27,7 @@ public class COTDBlockStateProvider extends BlockStateProvider {
         slabBlock((SlabBlock) COTDBlocks.POLISHED_GYPSUM_SLAB.get(), getExistingFile("polished_gypsum_slab"), getExistingFile("polished_gypsum_slab_top"), getExistingFile("polished_gypsum"));
 
         simpleBlock(COTDBlocks.SILKEN_HUSK.get(), getExistingFile("silken_husk"));
+        simpleBlock(COTDBlocks.CROCK_POT.get(), getExistingFile("crock_pot"));
     }
 
     private ModelFile getExistingFile(String name) {
