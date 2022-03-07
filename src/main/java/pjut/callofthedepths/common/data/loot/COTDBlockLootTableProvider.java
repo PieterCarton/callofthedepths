@@ -2,6 +2,7 @@ package pjut.callofthedepths.common.data.loot;
 
 import net.minecraft.data.loot.BlockLoot;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ public class COTDBlockLootTableProvider extends BlockLoot {
     protected void addTables() {
         dropSelf(COTDBlocks.ROPE_BLOCK.get());
         dropSelf(COTDBlocks.GYPSUM.get());
+        dropSelf(COTDBlocks.CROCK_POT.get());
     }
 
     @Override
@@ -25,6 +27,7 @@ public class COTDBlockLootTableProvider extends BlockLoot {
 
         known.add(COTDBlocks.ROPE_BLOCK.get());
         known.add(COTDBlocks.GYPSUM.get());
+        known.add(COTDBlocks.CROCK_POT.get());
 
         return known;
     }

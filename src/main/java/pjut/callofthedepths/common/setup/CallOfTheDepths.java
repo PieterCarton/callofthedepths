@@ -24,6 +24,7 @@ import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBiomes;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
+import pjut.callofthedepths.common.registry.COTDBlockEntityRenderers;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
@@ -99,11 +100,15 @@ public class CallOfTheDepths {
 
     public void onClientSetup(FMLClientSetupEvent evt) {
         LOGGER.info("HELLO from client setup");
+
+        COTDBlockEntityRenderers.register();
+
         // TODO: move into separate classes
         EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
         EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
 
         ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.CROCK_POT.get(), RenderType.cutout());
         ItemBlockRenderTypes.setRenderLayer(COTDBlocks.WEB_CARPET.get(), RenderType.tripwire());
     }
 

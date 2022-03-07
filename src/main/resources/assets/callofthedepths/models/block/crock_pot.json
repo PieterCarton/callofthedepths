@@ -2,8 +2,8 @@
 	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
 	"textures": {
-		"crock_pot": "callofthedepths:block/crock_pot",
-		"particle": "callofthedepths:block/crock_pot"
+		"particle": "callofthedepths:block/crock_pot",
+		"crock_pot": "callofthedepths:block/crock_pot"
 	},
 	"elements": [
 		{
@@ -69,6 +69,32 @@
 				"west": {"uv": [0, 0, 1, 4], "texture": "#crock_pot"},
 				"up": {"uv": [0, 0, 12, 1], "texture": "#crock_pot"},
 				"down": {"uv": [0, 0, 12, 1], "texture": "#crock_pot"}
+			}
+		},
+		{
+			"name": "handle w",
+			"from": [0, 4.5, 6],
+			"to": [2, 4.5, 10],
+			"faces": {
+				"north": {"uv": [0, 0, 2, 0], "texture": "#crock_pot"},
+				"east": {"uv": [0, 0, 4, 0], "texture": "#crock_pot"},
+				"south": {"uv": [0, 0, 2, 0], "texture": "#crock_pot"},
+				"west": {"uv": [0, 0, 4, 0], "texture": "#crock_pot"},
+				"up": {"uv": [12, 0, 14, 4], "texture": "#crock_pot"},
+				"down": {"uv": [12, 0, 14, 4], "texture": "#crock_pot"}
+			}
+		},
+		{
+			"name": "handle e",
+			"from": [14, 4.5, 6],
+			"to": [16, 4.5, 10],
+			"faces": {
+				"north": {"uv": [0, 0, 2, 0], "texture": "#crock_pot"},
+				"east": {"uv": [0, 0, 4, 0], "texture": "#crock_pot"},
+				"south": {"uv": [0, 0, 2, 0], "texture": "#crock_pot"},
+				"west": {"uv": [0, 0, 4, 0], "texture": "#crock_pot"},
+				"up": {"uv": [12, 0, 14, 4], "rotation": 180, "texture": "#crock_pot"},
+				"down": {"uv": [12, 0, 14, 4], "rotation": 180, "texture": "#crock_pot"}
 			}
 		}
 	]
