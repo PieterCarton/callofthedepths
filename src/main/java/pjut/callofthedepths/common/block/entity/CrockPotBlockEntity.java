@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
@@ -23,6 +26,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import org.jetbrains.annotations.Nullable;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
 
 import java.util.Collections;
@@ -75,10 +79,12 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
             for (int slot = 0; slot < inventory.size(); slot++) {
                 if (this.getItem(slot).equals(ItemStack.EMPTY)) {
                     this.setItem(slot, interactionItem.split(1));
+                    this.setChanged();
                     break;
                 }
             }
-            System.out.println("current inventory: " + inventory);
+            level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 2);
+            this.setChanged();
             return InteractionResult.CONSUME;
         }
 
@@ -103,6 +109,26 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
         crockPot.setHeated(level.getBlockState(pos.below()).is(Blocks.CAMPFIRE));
     }
 
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        System.out.println("got update tag");
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag) {
+        System.out.println("handled update tag");
+        load(tag);
+    }
+
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
@@ -111,10 +137,10 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         tag.putBoolean("full", this.full);
         ContainerHelper.saveAllItems(tag, inventory);
-        return super.save(tag);
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, CrockPotBlockEntity crockPot) {

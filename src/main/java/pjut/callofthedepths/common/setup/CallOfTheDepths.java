@@ -40,6 +40,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import pjut.callofthedepths.common.registry.COTDRecipeTypes;
 
 import java.util.stream.Collectors;
 
@@ -54,6 +55,7 @@ public class CallOfTheDepths {
         COTDEntityTypes.init();
         COTDFeatures.init();
         COTDBiomes.init();
+        COTDRecipeTypes.init();
 
         // Register the setup method for modloading
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
