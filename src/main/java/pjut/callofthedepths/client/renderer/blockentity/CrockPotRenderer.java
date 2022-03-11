@@ -1,14 +1,9 @@
 package pjut.callofthedepths.client.renderer.blockentity;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -17,20 +12,19 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.data.worldgen.biome.OverworldBiomes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
-
-import java.util.List;
+import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 
 public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity> {
 
@@ -62,14 +56,16 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
     public void render(CrockPotBlockEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         renderItems(entity, partialTicks, poseStack, bufferSource, combinedLight, combinedOverlay);
 
-        if (entity.isFull()) {
-            drawLiquidContents(poseStack, bufferSource, combinedLight, combinedOverlay);
+        if (!entity.hasNoLiquidContents()) {
+            drawLiquidContents(entity, poseStack, bufferSource, combinedLight, combinedOverlay);
         }
     }
 
-    private void drawLiquidContents(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
+    private void drawLiquidContents(CrockPotBlockEntity entity, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         poseStack.pushPose();
-        poseStack.translate(0.0D, 4.5D / 16.0D, 0.0D);
+        double liquidContentLevel = getLiquidContentLevel(entity);
+
+        poseStack.translate(0.0D, liquidContentLevel, 0.0D);
 
         TextureAtlasSprite texture = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("block/water_still"));
         texture.getU0();
@@ -85,9 +81,21 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
         BakedQuad quad = builder.build();
         PoseStack.Pose pose = poseStack.last();
 
-        VertexConsumer buffer = bufferSource.getBuffer(RenderType.waterMask());
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.translucent());
         buffer.putBulkData(pose, quad, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B, combinedLight, combinedOverlay/*OverlayTexture.NO_OVERLAY*/);
         poseStack.popPose();
+    }
+
+    private double getLiquidContentLevel(CrockPotBlockEntity entity) {
+        IFluidHandler fluidHandler = entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).orElse(null);
+
+        if (fluidHandler != null) {
+            FluidStack totalContents = fluidHandler.drain(Integer.MAX_VALUE, IFluidHandler.FluidAction.SIMULATE);
+            int fluidAmount = totalContents.getAmount();
+            return (1d + 3.5d * ((double)fluidAmount / 1000d)) / 16d;
+        }
+
+        return 4.5D / 16.0D;
     }
 
     private void putVertex(BakedQuadBuilder builder, float x, float y, float z, float u, float v) {
@@ -105,9 +113,10 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
 
     private void renderItems(CrockPotBlockEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         poseStack.pushPose();
+
         poseStack.translate(0.5, 0.2, 0.5);
 
-        for (int slot = 0; slot < entity.getContainerSize(); slot++) {
+        for (int slot = 0; slot < CrockPotRecipe.INGREDIENT_COUNT; slot++) {
             ItemStack stack = entity.getItem(slot);
             poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(0f, 360f / 8f, 0f)));
             if (!stack.isEmpty()) {

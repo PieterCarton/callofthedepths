@@ -20,6 +20,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.Tags;
@@ -38,18 +39,19 @@ import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
 import pjut.callofthedepths.common.registry.COTDRecipeTypes;
 
-import java.util.Optional;
-import java.util.Set;
 
 public class CrockPotBlockEntity extends BlockEntity implements Container {
-    public static final Set<ResourceLocation> acceptedFoodTags = fillAcceptedFoodTags();
+    private int cookTime;
+    private int cookTimeTotal;
+    // number of items created by last recipe, needed for rendering
+    private int resultCount;
 
     public CrockPotBlockEntity(BlockPos pos, BlockState state) {
         super(COTDBlockEntities.CROCK_POT_BE, pos, state);
     }
 
-    private final NonNullList<ItemStack> inventory = NonNullList.withSize(8, ItemStack.EMPTY);
-    private ItemStack result = ItemStack.EMPTY;
+    // slots 0-7: ingredients, slot 8: cooking result
+    private final NonNullList<ItemStack> inventory = NonNullList.withSize(9, ItemStack.EMPTY);
 
     // private LazyOptional<IItemHandler> itemHandler; /* TODO: add capability for exposing inventory */
     private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.of(() -> new FluidTank(1000, fluidStack -> fluidStack.getFluid().equals(Fluids.WATER)));
@@ -57,23 +59,13 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     private boolean heated = false;
 
     public InteractionResult interact(ItemStack interactionItem, Player player, InteractionHand hand) {
-        /* Three types of interactions
-         *  - Ingredient input / ouput
-         *  - Fluid input / output
-         *  - Result output
-         */
         InteractionResult result;
 
         LazyOptional<IFluidHandlerItem> fluidHandler = interactionItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
         if (fluidHandler.isPresent()) {
             result = handleFluidInteraction(interactionItem, player, hand);
         } else if (interactionItem.getItem().equals(Items.BOWL)) {
-
-            interactionItem.split(1);
-            player.addItem(new ItemStack(Items.MUSHROOM_STEW));
-
-            result = InteractionResult.SUCCESS;
-
+            result = handleBowlInteraction(interactionItem, player);
         } else {
             result = handleIngredientInteraction(interactionItem, player);
         }
@@ -86,16 +78,41 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
         return result;
     }
 
+    private InteractionResult handleBowlInteraction(ItemStack interactionItem, Player player) {
+        ItemStack cookingResult = this.inventory.get(8);
+
+        if (!cookingResult.isEmpty()) {
+            interactionItem.split(1);
+            player.addItem(cookingResult.split(1));
+
+            LazyOptional<IFluidHandler> fluidHandler = this.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
+            fluidHandler.ifPresent(h -> {
+
+                if (!cookingResult.isEmpty()) {
+                    h.drain(1000 / resultCount, IFluidHandler.FluidAction.EXECUTE);
+                } else {
+                    // make sure crock pot is completely empty when it has no more cookingResult left over
+                    h.drain(1000, IFluidHandler.FluidAction.EXECUTE);
+                }
+            });
+
+            return InteractionResult.SUCCESS;
+        }
+
+
+        return InteractionResult.FAIL;
+    }
+
     private InteractionResult handleFluidInteraction(ItemStack fluidContainer, Player player, InteractionHand hand) {
         IFluidHandler fluidSource = this.fluidHandler.orElse(new FluidTank(0));
-        InvWrapper inventory = new InvWrapper(player.getInventory());
+        InvWrapper invWrapper = new InvWrapper(player.getInventory());
 
         FluidActionResult actionResult;
 
-        if (this.isFull()) {
-            actionResult = FluidUtil.tryFillContainerAndStow(fluidContainer, fluidSource, inventory, 1000, player, true);
+        if (this.isFilled()) {
+            actionResult = FluidUtil.tryFillContainerAndStow(fluidContainer, fluidSource, invWrapper, 1000, player, true);
         } else {
-            actionResult = FluidUtil.tryEmptyContainerAndStow(fluidContainer, fluidSource, inventory, 1000, player, true);
+            actionResult = FluidUtil.tryEmptyContainerAndStow(fluidContainer, fluidSource, invWrapper, 1000, player, true);
         }
 
         if (actionResult.isSuccess()) {
@@ -110,17 +127,8 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     private InteractionResult handleIngredientInteraction(ItemStack interactionItem, Player player) {
         if (!interactionItem.isEmpty()) {   // input ingredient
 
-            Set<ResourceLocation> tags = interactionItem.getItem().getTags();
-            Optional<ResourceLocation> sharedTag = acceptedFoodTags.stream().filter(t -> tags.contains(t)).findAny();
-
-            if (sharedTag.isPresent()) {
-                System.out.println("shares a tag!");
-            }
-
-            System.out.println("adding item to inventory");
-            System.out.println("tags " + interactionItem.getItem().getTags());
-            for (int slot = 0; slot < inventory.size(); slot++) {
-                if (this.getItem(slot).equals(ItemStack.EMPTY)) {
+            for (int slot = 0; slot < CrockPotRecipe.INGREDIENT_COUNT; slot++) {
+                if (this.getItem(slot).isEmpty()) {
                     this.setItem(slot, interactionItem.split(1));
                     this.setChanged();
                     break;
@@ -130,8 +138,8 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
             return InteractionResult.SUCCESS;
         } else {
             // take out least recently entered item
-            for (int slot = inventory.size() - 1; slot >= 0; slot--) {
-                if (!this.getItem(slot).equals(ItemStack.EMPTY)) {
+            for (int slot = CrockPotRecipe.INGREDIENT_COUNT - 1; slot >= 0; slot--) {
+                if (!this.getItem(slot).isEmpty()) {
 
                     ItemStack stack = this.getItem(slot);
                     this.setItem(slot, ItemStack.EMPTY);
@@ -146,12 +154,34 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, CrockPotBlockEntity crockPot) {
-        if (crockPot.isHeated() && crockPot.isFull()) {
-            Optional<CrockPotRecipe> recipe = level.getRecipeManager().getRecipeFor(COTDRecipeTypes.CROCK_POT, crockPot, level);
-            if (recipe.isPresent()) {
-                //System.out.println("can make: " + recipe.get().getResultItem());
+        if (crockPot.isHeated() && crockPot.isFilled()) {
+            CrockPotRecipe recipe = level.getRecipeManager().getRecipeFor(COTDRecipeTypes.CROCK_POT, crockPot, level).orElse(null);
+            if (canCook(recipe, crockPot)) {
+                crockPot.cookTime++;
+                crockPot.cookTimeTotal = 200;
+
+                if (crockPot.cookTime == crockPot.cookTimeTotal) {
+                    // complete recipe
+
+                    ItemStack result = recipe.assemble(crockPot);
+                    crockPot.setItem(8, result);
+
+                    crockPot.resultCount = result.getCount();
+                    crockPot.cookTime = 0;
+
+                    level.sendBlockUpdated(crockPot.worldPosition, crockPot.getBlockState(), crockPot.getBlockState(), 2);
+                    crockPot.setChanged();
+                }
+                return;
             }
         }
+
+        crockPot.cookTimeTotal = 0;
+    }
+
+    private static boolean canCook(CrockPotRecipe recipe, CrockPotBlockEntity crockPot) {
+        ItemStack cookingResult = crockPot.getItem(8);
+        return recipe != null && cookingResult.isEmpty();
     }
 
     @NotNull
@@ -163,7 +193,12 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
         return super.getCapability(cap, side);
     }
 
-    public boolean isFull() {
+    public boolean hasNoLiquidContents() {
+        IFluidHandler fluidHandler = this.fluidHandler.orElse(new FluidTank(0));
+        return fluidHandler.getFluidInTank(0).getAmount() == 0;
+    }
+
+    public boolean isFilled() {
         IFluidHandler fluidHandler = this.fluidHandler.orElse(new FluidTank(0));
         return fluidHandler.getFluidInTank(0).getAmount() == 1000;
     }
@@ -204,6 +239,8 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     public void load(CompoundTag tag) {
         super.load(tag);
         this.heated = tag.getBoolean("heated");
+        this.cookTime = tag.getInt("cookTime");
+        this.cookTimeTotal = tag.getInt("cookTimeTotal");
 
         this.fluidHandler.ifPresent(h -> {
             ((FluidTank) h).readFromNBT(tag);
@@ -217,6 +254,8 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     public void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putBoolean("heated", this.heated);
+        tag.putInt("cookTime", cookTime);
+        tag.putInt("cookTimeTotal", cookTimeTotal);
 
         this.fluidHandler.ifPresent(h -> {
             ((FluidTank) h).writeToNBT(tag);
@@ -278,14 +317,5 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     @Override
     public void clearContent() {
         this.inventory.clear();
-    }
-
-    private static Set<ResourceLocation> fillAcceptedFoodTags() {
-        ImmutableSet.Builder<ResourceLocation> set = ImmutableSet.builder();
-        set.add(Tags.Items.MUSHROOMS.getName());
-        set.add(Tags.Items.MUSHROOMS.getName());
-        set.add(Tags.Items.CROPS_BEETROOT.getName());
-        set.add(Tags.Items.CROPS_CARROT.getName());
-        return set.build();
     }
 }

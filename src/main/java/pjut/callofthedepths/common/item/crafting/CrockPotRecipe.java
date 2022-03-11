@@ -21,6 +21,8 @@ import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
 import pjut.callofthedepths.common.registry.COTDRecipeTypes;
 
 public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
+    public static final int INGREDIENT_COUNT = 8;
+
     private final ResourceLocation id;
     private final ItemStack result;
     private final NonNullList<Ingredient> ingredients;
@@ -37,7 +39,7 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
         java.util.List<ItemStack> inputs = new java.util.ArrayList<>();
         int i = 0;
 
-        for(int j = 0; j < crockPot.getContainerSize(); ++j) {
+        for(int j = 0; j < INGREDIENT_COUNT; ++j) {
             ItemStack itemstack = crockPot.getItem(j);
             if (!itemstack.isEmpty()) {
                 ++i;
@@ -50,6 +52,9 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
 
     @Override
     public ItemStack assemble(CrockPotBlockEntity crockPot) {
+        for (int slot = 0; slot < INGREDIENT_COUNT; slot++) {
+            crockPot.setItem(slot, ItemStack.EMPTY);
+        }
         return this.result.copy();
     }
 

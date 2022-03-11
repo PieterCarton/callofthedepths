@@ -7,6 +7,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -21,6 +22,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
+import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
 import pjut.callofthedepths.common.registry.COTDParticleTypes;
 
@@ -54,15 +56,26 @@ public class CrockPotBlock extends BaseEntityBlock {
     public void animateTick(BlockState blockState, Level level, BlockPos pos, Random random) {
         CrockPotBlockEntity crockPot = (CrockPotBlockEntity) level.getBlockEntity(pos);
 
-        if (crockPot != null && crockPot.isHeated() && crockPot.isFull()) {
+        if (crockPot != null && crockPot.isHeated() && crockPot.isFilled()) {
             double x = pos.getX() + 0.5;
-            double y = pos.getY() + 1d / 16d;
+            double y = pos.getY() + 4.5d / 16d;
             double z = pos.getZ() + 0.5;
 
             double dx = (random.nextDouble() - 0.5) * (5d / 8d);
             double dz = (random.nextDouble() - 0.5) * (5d / 8d);
 
-            level.addParticle(COTDParticleTypes.CROCK_POT_BUBBLE.get(), x + dx, y, z + dz, 0.0, 0.0, 0.0);
+            level.addParticle(ParticleTypes.BUBBLE_POP, x + dx, y, z + dz, 0.0, 0.0, 0.0);
+        }
+    }
+
+    @Override
+    public void onPlace(BlockState state1, Level level, BlockPos pos, BlockState state2, boolean p_60570_) {
+        super.onPlace(state1, level, pos, state2, p_60570_);
+
+        CrockPotBlockEntity crockPot = (CrockPotBlockEntity) level.getBlockEntity(pos);
+
+        if (crockPot != null) {
+            CrockPotBlockEntity.checkHeated(level, pos, crockPot);
         }
     }
 
@@ -91,7 +104,10 @@ public class CrockPotBlock extends BaseEntityBlock {
 
     @Override
     public void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean p_60519_) {
-        Containers.dropContents(level, pos, (CrockPotBlockEntity) level.getBlockEntity(pos));
+        CrockPotBlockEntity crockPot = (CrockPotBlockEntity) level.getBlockEntity(pos);
+        crockPot.setItem(8, ItemStack.EMPTY);
+
+        Containers.dropContents(level, pos, crockPot);
         super.onRemove(oldState, level, pos, newState, p_60519_);
     }
 }
