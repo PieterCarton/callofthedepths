@@ -2,8 +2,7 @@ package pjut.callofthedepths.common.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,6 +22,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
+import pjut.callofthedepths.common.registry.COTDParticleTypes;
+
+import java.util.Random;
 
 public class CrockPotBlock extends BaseEntityBlock {
 
@@ -48,6 +50,22 @@ public class CrockPotBlock extends BaseEntityBlock {
         return new CrockPotBlockEntity(pos, state);
     }
 
+    @Override
+    public void animateTick(BlockState blockState, Level level, BlockPos pos, Random random) {
+        CrockPotBlockEntity crockPot = (CrockPotBlockEntity) level.getBlockEntity(pos);
+
+        if (crockPot != null && crockPot.isHeated() && crockPot.isFull()) {
+            double x = pos.getX() + 0.5;
+            double y = pos.getY() + 1d / 16d;
+            double z = pos.getZ() + 0.5;
+
+            double dx = (random.nextDouble() - 0.5) * (5d / 8d);
+            double dz = (random.nextDouble() - 0.5) * (5d / 8d);
+
+            level.addParticle(COTDParticleTypes.CROCK_POT_BUBBLE.get(), x + dx, y, z + dz, 0.0, 0.0, 0.0);
+        }
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> type) {
@@ -56,8 +74,7 @@ public class CrockPotBlock extends BaseEntityBlock {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState neighbourState, LevelAccessor level, BlockPos pos, BlockPos updatedPos) {
-        if (!level.isClientSide() && direction == Direction.DOWN) {
-            System.out.println("rechecking");
+        if (direction == Direction.DOWN) {
             CrockPotBlockEntity.checkHeated(level, pos, (CrockPotBlockEntity) level.getBlockEntity(pos));
         }
         return blockState;
@@ -69,7 +86,7 @@ public class CrockPotBlock extends BaseEntityBlock {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        return entity.interact(player.getItemInHand(hand), player);
+        return entity.interact(player.getItemInHand(hand), player, hand);
     }
 
     @Override

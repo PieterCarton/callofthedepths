@@ -4,7 +4,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 public class COTDBlockModelProvider extends BlockModelProvider {
     public COTDBlockModelProvider(DataGenerator generator, ExistingFileHelper existingFileHelper) {

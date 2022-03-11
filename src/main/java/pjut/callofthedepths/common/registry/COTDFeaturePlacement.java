@@ -1,10 +1,6 @@
 package pjut.callofthedepths.common.registry;
 
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
 import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
@@ -15,7 +11,7 @@ import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 @Mod.EventBusSubscriber(modid = CallOfTheDepths.MOD_ID)
 public class COTDFeaturePlacement {

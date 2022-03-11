@@ -2,21 +2,19 @@ package pjut.callofthedepths.common.registry;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import pjut.callofthedepths.common.block.CrockPotBlock;
 import pjut.callofthedepths.common.block.RopeBlock;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 import java.util.function.Supplier;
 

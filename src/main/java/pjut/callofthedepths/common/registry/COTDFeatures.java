@@ -8,7 +8,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import pjut.callofthedepths.common.level.feature.TestFeature;
 import pjut.callofthedepths.common.level.feature.WebPatchFeature;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 public class COTDFeatures {
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, CallOfTheDepths.MOD_ID);

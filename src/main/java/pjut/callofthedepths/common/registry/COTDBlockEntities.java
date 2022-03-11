@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 @Mod.EventBusSubscriber(modid = CallOfTheDepths.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class COTDBlockEntities {

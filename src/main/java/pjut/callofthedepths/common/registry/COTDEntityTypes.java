@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import pjut.callofthedepths.common.entity.Crawler;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 
 @Mod.EventBusSubscriber(modid = CallOfTheDepths.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class COTDEntityTypes {

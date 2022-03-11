@@ -1,9 +1,14 @@
 package pjut.callofthedepths.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -25,7 +30,19 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
 
+import java.util.List;
+
 public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity> {
+
+//    private static final Int2ObjectMap<List<Vec3>> PARTICLE_OFFSETS = Util.make(() -> {
+//        Int2ObjectMap<List<Vec3>> int2objectmap = new Int2ObjectOpenHashMap<>();
+//        int2objectmap.defaultReturnValue(ImmutableList.of());
+//        int2objectmap.put(1, ImmutableList.of(new Vec3(0.5D, 0.5D, 0.5D)));
+//        int2objectmap.put(2, ImmutableList.of(new Vec3(0.375D, 0.44D, 0.5D), new Vec3(0.625D, 0.5D, 0.44D)));
+//        int2objectmap.put(3, ImmutableList.of(new Vec3(0.5D, 0.313D, 0.625D), new Vec3(0.375D, 0.44D, 0.5D), new Vec3(0.56D, 0.5D, 0.44D)));
+//        int2objectmap.put(4, ImmutableList.of(new Vec3(0.44D, 0.313D, 0.56D), new Vec3(0.625D, 0.44D, 0.56D), new Vec3(0.375D, 0.44D, 0.375D), new Vec3(0.56D, 0.5D, 0.375D)));
+//        return Int2ObjectMaps.unmodifiable(int2objectmap);
+//    });
 
     protected static final int WATER_COLOR = 0x3f76e4;
     protected static final float WATER_COLOR_R = 0x3f / 255f;
@@ -40,12 +57,18 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
     }
 
+    // TODO: return and refine
     @Override
     public void render(CrockPotBlockEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
-        poseStack.pushPose();
-
         renderItems(entity, partialTicks, poseStack, bufferSource, combinedLight, combinedOverlay);
 
+        if (entity.isFull()) {
+            drawLiquidContents(poseStack, bufferSource, combinedLight, combinedOverlay);
+        }
+    }
+
+    private void drawLiquidContents(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
+        poseStack.pushPose();
         poseStack.translate(0.0D, 4.5D / 16.0D, 0.0D);
 
         TextureAtlasSprite texture = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(new ResourceLocation("block/water_still"));
@@ -62,9 +85,8 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
         BakedQuad quad = builder.build();
         PoseStack.Pose pose = poseStack.last();
 
-        VertexConsumer buffer = bufferSource.getBuffer(RenderType.translucent());
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.waterMask());
         buffer.putBulkData(pose, quad, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B, combinedLight, combinedOverlay/*OverlayTexture.NO_OVERLAY*/);
-
         poseStack.popPose();
     }
 

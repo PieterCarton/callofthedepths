@@ -7,7 +7,7 @@ import pjut.callofthedepths.common.item.COTDFoods;
 import pjut.callofthedepths.common.item.ClimbingPickItem;
 import pjut.callofthedepths.common.item.DebugItem;
 import pjut.callofthedepths.common.item.RopeItem;
-import pjut.callofthedepths.common.setup.CallOfTheDepths;
+import pjut.callofthedepths.common.CallOfTheDepths;
 import pjut.callofthedepths.common.item.TorchArrowItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;

@@ -2,6 +2,7 @@ package pjut.callofthedepths.common.block.entity;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -10,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,15 +23,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.items.wrapper.InvWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
+import pjut.callofthedepths.common.registry.COTDRecipeTypes;
 
-import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 public class CrockPotBlockEntity extends BlockEntity implements Container {
@@ -40,40 +49,74 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(8, ItemStack.EMPTY);
+    private ItemStack result = ItemStack.EMPTY;
+
     // private LazyOptional<IItemHandler> itemHandler; /* TODO: add capability for exposing inventory */
-    private boolean full = false;
+    private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.of(() -> new FluidTank(1000, fluidStack -> fluidStack.getFluid().equals(Fluids.WATER)));
+
     private boolean heated = false;
 
-    // only execute on client
-    public InteractionResult interact(ItemStack interactionItem, Player player) {
-
-        System.out.println("interaction propagated to block entity");
-        System.out.println("clicked on crock pot with: " + interactionItem.toString());
+    public InteractionResult interact(ItemStack interactionItem, Player player, InteractionHand hand) {
+        /* Three types of interactions
+         *  - Ingredient input / ouput
+         *  - Fluid input / output
+         *  - Result output
+         */
+        InteractionResult result;
 
         LazyOptional<IFluidHandlerItem> fluidHandler = interactionItem.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
-
         if (fluidHandler.isPresent()) {
-            System.out.println("item is a fluid handler containing");
-            fluidHandler.ifPresent(h -> {
-                System.out.println(h.getFluidInTank(0).getFluid().toString());
-                System.out.println("water, lava, half bucket of water");
-
-                FluidStack desiredWater = new FluidStack(Fluids.WATER, 1000);
-                FluidStack tryDrainResult = h.drain(desiredWater, IFluidHandler.FluidAction.SIMULATE);
-
-                if (tryDrainResult.getFluid().equals(Fluids.WATER) && tryDrainResult.getAmount() == 1000) {
-                    System.out.println("filled");
-                    h.drain(desiredWater, IFluidHandler.FluidAction.EXECUTE);
-                    this.full = true;
-                }
-            });
-            return InteractionResult.CONSUME;
+            result = handleFluidInteraction(interactionItem, player, hand);
         } else if (interactionItem.getItem().equals(Items.BOWL)) {
+
             interactionItem.split(1);
             player.addItem(new ItemStack(Items.MUSHROOM_STEW));
 
-            return InteractionResult.CONSUME;
-        } else if (interactionItem.getItem().equals(Items.BROWN_MUSHROOM)) {
+            result = InteractionResult.SUCCESS;
+
+        } else {
+            result = handleIngredientInteraction(interactionItem, player);
+        }
+
+        if (result.equals(InteractionResult.SUCCESS)) {
+            level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 2);
+            this.setChanged();
+        }
+
+        return result;
+    }
+
+    private InteractionResult handleFluidInteraction(ItemStack fluidContainer, Player player, InteractionHand hand) {
+        IFluidHandler fluidSource = this.fluidHandler.orElse(new FluidTank(0));
+        InvWrapper inventory = new InvWrapper(player.getInventory());
+
+        FluidActionResult actionResult;
+
+        if (this.isFull()) {
+            actionResult = FluidUtil.tryFillContainerAndStow(fluidContainer, fluidSource, inventory, 1000, player, true);
+        } else {
+            actionResult = FluidUtil.tryEmptyContainerAndStow(fluidContainer, fluidSource, inventory, 1000, player, true);
+        }
+
+        if (actionResult.isSuccess()) {
+            player.setItemInHand(hand, actionResult.getResult());
+            return InteractionResult.SUCCESS;
+        }
+
+        return InteractionResult.FAIL;
+    }
+
+    @NotNull
+    private InteractionResult handleIngredientInteraction(ItemStack interactionItem, Player player) {
+        if (!interactionItem.isEmpty()) {   // input ingredient
+
+            Set<ResourceLocation> tags = interactionItem.getItem().getTags();
+            Optional<ResourceLocation> sharedTag = acceptedFoodTags.stream().filter(t -> tags.contains(t)).findAny();
+
+            if (sharedTag.isPresent()) {
+                System.out.println("shares a tag!");
+            }
+
             System.out.println("adding item to inventory");
             System.out.println("tags " + interactionItem.getItem().getTags());
             for (int slot = 0; slot < inventory.size(); slot++) {
@@ -83,16 +126,46 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
                     break;
                 }
             }
-            level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 2);
-            this.setChanged();
-            return InteractionResult.CONSUME;
+
+            return InteractionResult.SUCCESS;
+        } else {
+            // take out least recently entered item
+            for (int slot = inventory.size() - 1; slot >= 0; slot--) {
+                if (!this.getItem(slot).equals(ItemStack.EMPTY)) {
+
+                    ItemStack stack = this.getItem(slot);
+                    this.setItem(slot, ItemStack.EMPTY);
+
+                    player.addItem(stack);
+                    return InteractionResult.SUCCESS;
+                }
+            }
         }
 
         return InteractionResult.FAIL;
     }
 
+    public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, CrockPotBlockEntity crockPot) {
+        if (crockPot.isHeated() && crockPot.isFull()) {
+            Optional<CrockPotRecipe> recipe = level.getRecipeManager().getRecipeFor(COTDRecipeTypes.CROCK_POT, crockPot, level);
+            if (recipe.isPresent()) {
+                //System.out.println("can make: " + recipe.get().getResultItem());
+            }
+        }
+    }
+
+    @NotNull
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (cap.equals(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY))
+            return this.fluidHandler.cast();
+
+        return super.getCapability(cap, side);
+    }
+
     public boolean isFull() {
-        return full;
+        IFluidHandler fluidHandler = this.fluidHandler.orElse(new FluidTank(0));
+        return fluidHandler.getFluidInTank(0).getAmount() == 1000;
     }
 
     public boolean isHeated() {
@@ -104,8 +177,6 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     public static void checkHeated(BlockGetter level, BlockPos pos, CrockPotBlockEntity crockPot) {
-        System.out.println("should be heated? " + level.getBlockState(pos.below()).is(Blocks.CAMPFIRE));
-        System.out.println("current blockstate: " + level.getBlockState(pos.below()));
         crockPot.setHeated(level.getBlockState(pos.below()).is(Blocks.CAMPFIRE));
     }
 
@@ -132,21 +203,26 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        this.full = tag.getBoolean("full");
+        this.heated = tag.getBoolean("heated");
+
+        this.fluidHandler.ifPresent(h -> {
+            ((FluidTank) h).readFromNBT(tag);
+        });
+
+        this.inventory.clear();
         ContainerHelper.loadAllItems(tag, inventory);
     }
 
     @Override
     public void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        tag.putBoolean("full", this.full);
-        ContainerHelper.saveAllItems(tag, inventory);
-    }
+        tag.putBoolean("heated", this.heated);
 
-    public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, CrockPotBlockEntity crockPot) {
-        if (crockPot.isHeated() && crockPot.isFull()) {
-            // TODO: cooking here
-        }
+        this.fluidHandler.ifPresent(h -> {
+            ((FluidTank) h).writeToNBT(tag);
+        });
+
+        ContainerHelper.saveAllItems(tag, inventory);
     }
 
     @Override
@@ -175,6 +251,7 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     @Override
+    @NotNull
     public ItemStack removeItemNoUpdate(int slot) {
         return ContainerHelper.takeItem(inventory, slot);
     }
@@ -204,8 +281,11 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     }
 
     private static Set<ResourceLocation> fillAcceptedFoodTags() {
-        ImmutableSet.Builder set = ImmutableSet.builder();
-        set.add(Tags.Items.MUSHROOMS);
+        ImmutableSet.Builder<ResourceLocation> set = ImmutableSet.builder();
+        set.add(Tags.Items.MUSHROOMS.getName());
+        set.add(Tags.Items.MUSHROOMS.getName());
+        set.add(Tags.Items.CROPS_BEETROOT.getName());
+        set.add(Tags.Items.CROPS_CARROT.getName());
         return set.build();
     }
 }

@@ -1,45 +1,36 @@
-package pjut.callofthedepths.common.setup;
+package pjut.callofthedepths.common;
 
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraftforge.client.event.ModelBakeEvent;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.*;
-import pjut.callofthedepths.client.renderer.entity.CrawlerRenderer;
-import pjut.callofthedepths.client.renderer.entity.TorchArrowRenderer;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import pjut.callofthedepths.client.registry.COTDRenderers;
 import pjut.callofthedepths.common.entity.projectile.TorchArrow;
 import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBiomes;
-import pjut.callofthedepths.common.registry.COTDBlockEntities;
-import pjut.callofthedepths.common.registry.COTDBlockEntityRenderers;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
 import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
 import pjut.callofthedepths.common.registry.COTDFeatures;
 import pjut.callofthedepths.common.registry.COTDItems;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import pjut.callofthedepths.common.registry.COTDParticleTypes;
 import pjut.callofthedepths.common.registry.COTDRecipeTypes;
 
 import java.util.stream.Collectors;
@@ -56,6 +47,7 @@ public class CallOfTheDepths {
         COTDFeatures.init();
         COTDBiomes.init();
         COTDRecipeTypes.init();
+        COTDParticleTypes.init();
 
         // Register the setup method for modloading
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -75,7 +67,6 @@ public class CallOfTheDepths {
 
     private void setup(final FMLCommonSetupEvent event)
     {
-        System.out.println("CommonSetup");
         COTDPacketHandler.registerPackets();
         COTDBiomes.registerBiomes();
     }
@@ -101,17 +92,7 @@ public class CallOfTheDepths {
     }
 
     public void onClientSetup(FMLClientSetupEvent evt) {
-        LOGGER.info("HELLO from client setup");
-
-        COTDBlockEntityRenderers.register();
-
-        // TODO: move into separate classes
-        EntityRenderers.register(COTDEntityTypes.TORCH_ARROW.get(), TorchArrowRenderer::new);
-        EntityRenderers.register(COTDEntityTypes.CRAWLER.get(), CrawlerRenderer::new);
-
-        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.ROPE_BLOCK.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.CROCK_POT.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(COTDBlocks.WEB_CARPET.get(), RenderType.tripwire());
+        COTDRenderers.register();
     }
 
     public void onPostSetup(FMLLoadCompleteEvent evt) {
