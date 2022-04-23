@@ -1,6 +1,7 @@
 {
   "type": "callofthedepths:crock_pot",
   "group": "soups",
+  "cookTime": 0,
   "ingredients": [
     {
       "tag": "forge:mushrooms"
@@ -28,7 +29,7 @@
     }
   ],
   "result": {
-    "item": "minecraft:mushroom_stew",
+    "item": "minecraft:mushroom_stem",
     "count": 8
   }
 }

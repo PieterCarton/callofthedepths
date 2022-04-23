@@ -1,0 +1,35 @@
+{
+  "type": "callofthedepths:crock_pot",
+  "group": "soups",
+  "cookTime": 0,
+  "ingredients": [
+    {
+      "tag": "forge:mushrooms"
+    },
+    {
+      "tag": "forge:mushrooms"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    },
+    {
+      "tag": "forge:crops/carrot"
+    },
+    {
+      "tag": "forge:crops/carrot"
+    },
+    {
+      "item": "minecraft:cooked_rabbit"
+    },
+    {
+      "item": "minecraft:cooked_rabbit"
+    }
+  ],
+  "result": {
+    "item": "minecraft:rabbit_stew",
+    "count": 8
+  }
+}

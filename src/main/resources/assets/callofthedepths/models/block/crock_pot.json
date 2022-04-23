@@ -1,6 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"ambientocclusion": false,
+	"texture_size": [32, 32],
 	"textures": {
 		"particle": "callofthedepths:block/crock_pot",
 		"crock_pot": "callofthedepths:block/crock_pot"

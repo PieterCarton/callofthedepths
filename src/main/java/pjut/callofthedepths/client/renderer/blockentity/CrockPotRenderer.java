@@ -1,9 +1,14 @@
 package pjut.callofthedepths.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -18,42 +23,63 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.pipeline.BakedQuadBuilder;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import org.lwjgl.system.CallbackI;
+import pjut.callofthedepths.common.CallOfTheDepths;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
 import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 
+import java.util.List;
+
 public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity> {
 
-//    private static final Int2ObjectMap<List<Vec3>> PARTICLE_OFFSETS = Util.make(() -> {
-//        Int2ObjectMap<List<Vec3>> int2objectmap = new Int2ObjectOpenHashMap<>();
-//        int2objectmap.defaultReturnValue(ImmutableList.of());
-//        int2objectmap.put(1, ImmutableList.of(new Vec3(0.5D, 0.5D, 0.5D)));
-//        int2objectmap.put(2, ImmutableList.of(new Vec3(0.375D, 0.44D, 0.5D), new Vec3(0.625D, 0.5D, 0.44D)));
-//        int2objectmap.put(3, ImmutableList.of(new Vec3(0.5D, 0.313D, 0.625D), new Vec3(0.375D, 0.44D, 0.5D), new Vec3(0.56D, 0.5D, 0.44D)));
-//        int2objectmap.put(4, ImmutableList.of(new Vec3(0.44D, 0.313D, 0.56D), new Vec3(0.625D, 0.44D, 0.56D), new Vec3(0.375D, 0.44D, 0.375D), new Vec3(0.56D, 0.5D, 0.375D)));
-//        return Int2ObjectMaps.unmodifiable(int2objectmap);
-//    });
+    public static final ResourceLocation CROCK_POT_WOBBLE_LOCATION = new ResourceLocation(CallOfTheDepths.MOD_ID, "crock_pot_wobble");
 
-    protected static final int WATER_COLOR = 0x3f76e4;
     protected static final float WATER_COLOR_R = 0x3f / 255f;
     protected static final float WATER_COLOR_G = 0x76 / 255f;
     protected static final float WATER_COLOR_B = 0xe4 / 255f;
 
     private static final Vec3 FLUID_BOTTOM_LEFT = new Vec3(3.0f / 16.0f, 0.0f, 3.0f / 16.0f);
     private static final Vec3 FLUID_TOP_RIGHT = new Vec3(13.0f / 16.0f, 0.0f, 13.0f / 16.0f);
+    private static final float WOBBLE_SPEED = 0.05f;
+
+    private static final Int2ObjectMap<Vec3> INGREDIENT_OFFSETS = Util.make(() -> {
+        Int2ObjectMap<Vec3> int2objectmap = new Int2ObjectOpenHashMap<>();
+        int2objectmap.defaultReturnValue(new Vec3(0, 0, 0));
+        int2objectmap.put(0, new Vec3(1, 1, 1));
+        return Int2ObjectMaps.unmodifiable(int2objectmap);
+    });
+
+
     private final ItemRenderer itemRenderer;
+
+    private NormalNoise wobbleNoise;
+    private int age;
 
     public CrockPotRenderer(BlockEntityRendererProvider.Context context) {
         this.itemRenderer = Minecraft.getInstance().getItemRenderer();
+        this.age = 0;
+
+        int seed = 3000;
+        PositionalRandomFactory positionalRandomFactory = WorldgenRandom.Algorithm.XOROSHIRO.newInstance(seed).forkPositional();
+        //NormalNoise.NoiseParameters params = new NormalNoise.NoiseParameters(1, 30d, 0d, 5d);
+        NormalNoise.NoiseParameters params = new NormalNoise.NoiseParameters(1, 10d, 0d, 1d);
+
+        this.wobbleNoise = NormalNoise.create(positionalRandomFactory.fromHashOf(CROCK_POT_WOBBLE_LOCATION), params);
     }
 
     // TODO: return and refine
     @Override
     public void render(CrockPotBlockEntity entity, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
+        this.age++;
         renderItems(entity, partialTicks, poseStack, bufferSource, combinedLight, combinedOverlay);
 
         if (!entity.hasNoLiquidContents()) {
@@ -125,6 +151,7 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
                 poseStack.translate(0.2, 0, 0);
                 poseStack.scale(0.5f, 0.5f, 0.5f);
                 poseStack.mulPose(Quaternion.fromXYZDegrees(new Vector3f(90f, 0f, 0f)));
+                poseStack.mulPose(this.createWobbleRotation());
 
 
                 BakedModel itemModel = this.itemRenderer.getModel(stack, entity.getLevel(), null, 0);
@@ -135,6 +162,15 @@ public class CrockPotRenderer implements BlockEntityRenderer<CrockPotBlockEntity
         }
 
         poseStack.popPose();
+    }
+
+    private static Vec3 voxelPosition(double x, double y, double z) {
+        double voxelSize = 1d / 16d;
+        return new Vec3(voxelSize * x, voxelSize * y, voxelSize * z);
+    }
+
+    private Quaternion createWobbleRotation() {
+        return Quaternion.fromXYZDegrees(new Vector3f((float) this.wobbleNoise.getValue(this.age * WOBBLE_SPEED, 0f, this.age * WOBBLE_SPEED), 0f, 0f));
     }
 
     @Override

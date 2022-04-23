@@ -1,5 +1,6 @@
 package pjut.callofthedepths.common.registry;
 
+import net.minecraft.world.item.BowlFoodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tiers;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -33,6 +34,8 @@ public class COTDItems {
 
     public static final RegistryObject<Item> GLOW_BERRY_BAR = ITEMS.register("glow_berry_bar",
             () -> new Item(getSharedProperties().food(COTDFoods.GLOW_BERRY_BAR)));
+    public static final RegistryObject<Item> GLOW_BERRY_SOUP = ITEMS.register("glow_berry_soup",
+            () -> new BowlFoodItem(getSharedProperties().food(COTDFoods.GLOW_BERRY_SOUP).stacksTo(1)));
     public static final RegistryObject<Item> GRANOLA_BAR = ITEMS.register("granola_bar",
             () -> new Item(getSharedProperties().food(COTDFoods.GRANOLA_BAR)));
     public static final RegistryObject<Item> TORCH_ARROW = ITEMS.register("torch_arrow",

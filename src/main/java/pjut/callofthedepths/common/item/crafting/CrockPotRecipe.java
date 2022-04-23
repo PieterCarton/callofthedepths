@@ -25,12 +25,14 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
 
     private final ResourceLocation id;
     private final ItemStack result;
+    private final int cookTime;
     private final NonNullList<Ingredient> ingredients;
 
-    public CrockPotRecipe(ResourceLocation id, ItemStack result, NonNullList<Ingredient> ingredients) {
+    public CrockPotRecipe(ResourceLocation id, ItemStack result, NonNullList<Ingredient> ingredients, int cookTime) {
         this.id = id;
         this.result = result;
         this.ingredients = ingredients;
+        this.cookTime = cookTime;
     }
 
     @Override
@@ -68,6 +70,10 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
         return this.result;
     }
 
+    public int getCookTime() {
+        return cookTime;
+    }
+
     @Override
     public ResourceLocation getId() {
         return id;
@@ -89,8 +95,10 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
 
             ItemStack result = ShapedRecipe.itemStackFromJson(jsonObject.getAsJsonObject("result"));
             NonNullList<Ingredient> ingredients = itemsFromJson(jsonObject.getAsJsonArray("ingredients"));
+            int cookTime = jsonObject.get("cookTime").getAsInt();
 
-            return new CrockPotRecipe(location, result, ingredients);
+
+            return new CrockPotRecipe(location, result, ingredients, cookTime);
         }
 
         private static NonNullList<Ingredient> itemsFromJson(JsonArray array) {
@@ -118,7 +126,9 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
                 ingredients.set(size, Ingredient.fromNetwork(buff));
             }
 
-            return new CrockPotRecipe(location, result, ingredients);
+            int cookTime = buff.readInt();
+
+            return new CrockPotRecipe(location, result, ingredients, cookTime);
         }
 
         @Override
@@ -130,6 +140,8 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
             for (Ingredient i: crockPotRecipe.ingredients) {
                 i.toNetwork(buff);
             }
+
+            buff.writeInt(crockPotRecipe.getCookTime());
         }
     }
 }

@@ -1,0 +1,35 @@
+{
+  "type": "callofthedepths:crock_pot",
+  "group": "soups",
+  "cookTime": 0,
+  "ingredients": [
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    },
+    {
+      "tag": "forge:crops/beetroot"
+    }
+  ],
+  "result": {
+    "item": "minecraft:beetroot_soup",
+    "count": 8
+  }
+}

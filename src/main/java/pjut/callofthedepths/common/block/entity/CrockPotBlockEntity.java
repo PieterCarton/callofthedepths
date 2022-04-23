@@ -27,6 +27,7 @@ import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -38,6 +39,8 @@ import org.jetbrains.annotations.Nullable;
 import pjut.callofthedepths.common.item.crafting.CrockPotRecipe;
 import pjut.callofthedepths.common.registry.COTDBlockEntities;
 import pjut.callofthedepths.common.registry.COTDRecipeTypes;
+
+import java.util.function.Predicate;
 
 
 public class CrockPotBlockEntity extends BlockEntity implements Container {
@@ -54,7 +57,8 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     private final NonNullList<ItemStack> inventory = NonNullList.withSize(9, ItemStack.EMPTY);
 
     // private LazyOptional<IItemHandler> itemHandler; /* TODO: add capability for exposing inventory */
-    private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.of(() -> new FluidTank(1000, fluidStack -> fluidStack.getFluid().equals(Fluids.WATER)));
+    private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.of(() -> new CrockPotFluidHandler(this));
+    //LazyOptional.of(() -> new FluidTank(1000, fluidStack -> fluidStack.getFluid().equals(Fluids.WATER)));
 
     private boolean heated = false;
 
@@ -153,12 +157,13 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
         return InteractionResult.FAIL;
     }
 
+    // TODO: cache result instead of re-fetching recipe every tick
     public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, CrockPotBlockEntity crockPot) {
         if (crockPot.isHeated() && crockPot.isFilled()) {
             CrockPotRecipe recipe = level.getRecipeManager().getRecipeFor(COTDRecipeTypes.CROCK_POT, crockPot, level).orElse(null);
             if (canCook(recipe, crockPot)) {
                 crockPot.cookTime++;
-                crockPot.cookTimeTotal = 200;
+                crockPot.cookTimeTotal = recipe.getCookTime();
 
                 if (crockPot.cookTime == crockPot.cookTimeTotal) {
                     // complete recipe
@@ -317,5 +322,23 @@ public class CrockPotBlockEntity extends BlockEntity implements Container {
     @Override
     public void clearContent() {
         this.inventory.clear();
+    }
+
+    private static class CrockPotFluidHandler extends FluidTank {
+        private final CrockPotBlockEntity crockPot;
+
+        public CrockPotFluidHandler(CrockPotBlockEntity crockPot) {
+            super(1000, fluidStack -> fluidStack.getFluid().equals(Fluids.WATER));
+            this.crockPot = crockPot;
+        }
+
+        @NotNull
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            if (this.crockPot.inventory.stream().allMatch(ItemStack::isEmpty)) {
+                return super.drain(maxDrain, action);
+            }
+            return FluidStack.EMPTY;
+        }
     }
 }
