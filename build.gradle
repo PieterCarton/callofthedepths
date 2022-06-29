@@ -125,6 +125,16 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
 }
 
 dependencies {
@@ -141,6 +151,12 @@ dependencies {
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
     // https://mvnrepository.com/artifact/org.mockito/mockito-all
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+
+    /* JEI API Dependency */
+    // compile against the JEI API but do not include it at runtime
+    compileOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.172:api")
+    // at runtime, use the full JEI jar
+    runtimeOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.172")
 }
 
 mixin {
