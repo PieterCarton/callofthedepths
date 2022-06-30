@@ -20,6 +20,8 @@ version = '1.0'
 group = 'pjut.callofthedepths' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'callofthedepths'
 
+// starting changes
+
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -125,6 +127,7 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    // JEI
     maven {
         // location of the maven that hosts JEI files
         name = "Progwml6 maven"
@@ -134,6 +137,10 @@ repositories {
         // location of a maven mirror for JEI files, as a fallback
         name = "ModMaven"
         url = "https://modmaven.dev"
+    }
+    // geckolib
+    repositories{
+        maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     }
 }
 
@@ -157,6 +164,9 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.172:api")
     // at runtime, use the full JEI jar
     runtimeOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.172")
+
+    /* Geckolib Depedency */
+    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.18:3.0.26')
 }
 
 mixin {

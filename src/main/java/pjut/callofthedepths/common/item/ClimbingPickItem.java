@@ -41,6 +41,11 @@ public class ClimbingPickItem extends PickaxeItem {
     private static final int USAGE_COOLDOWN = 5;
 
     private int currentCooldown = 0;
+
+    public int getMaxJumps() {
+        return MAX_JUMPS;
+    }
+
     private final int MAX_JUMPS;
 
     public ClimbingPickItem(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder, int maxJumps) {
