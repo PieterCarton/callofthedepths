@@ -3,18 +3,16 @@ package pjut.callofthedepths.common.data.builder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.Tag;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
-import pjut.callofthedepths.common.registry.COTDRecipeTypes;
+import pjut.callofthedepths.common.registry.COTDRecipeSerializers;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +43,7 @@ public class CrockPotRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
-    public CrockPotRecipeBuilder requires(Tag<Item> tag, int count) {
+    public CrockPotRecipeBuilder requires(TagKey<Item> tag, int count) {
         requires(Ingredient.of(tag), count);
         return this;
     }
@@ -118,7 +116,7 @@ public class CrockPotRecipeBuilder implements RecipeBuilder {
 
         @Override
         public RecipeSerializer<?> getType() {
-            return COTDRecipeTypes.CROCK_POT_SERIALIZER.get();
+            return COTDRecipeSerializers.CROCK_POT_SERIALIZER.get();
         }
 
         @Nullable

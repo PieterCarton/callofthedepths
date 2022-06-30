@@ -27,11 +27,10 @@ import pjut.callofthedepths.common.network.COTDPacketHandler;
 import pjut.callofthedepths.common.registry.COTDBiomes;
 import pjut.callofthedepths.common.registry.COTDBlocks;
 import pjut.callofthedepths.common.registry.COTDEntityTypes;
-import pjut.callofthedepths.common.registry.COTDFeaturePlacement;
 import pjut.callofthedepths.common.registry.COTDFeatures;
 import pjut.callofthedepths.common.registry.COTDItems;
 import pjut.callofthedepths.common.registry.COTDParticleTypes;
-import pjut.callofthedepths.common.registry.COTDRecipeTypes;
+import pjut.callofthedepths.common.registry.COTDRecipeSerializers;
 
 import java.util.stream.Collectors;
 
@@ -46,14 +45,14 @@ public class CallOfTheDepths {
         COTDEntityTypes.init();
         COTDFeatures.init();
         COTDBiomes.init();
-        COTDRecipeTypes.init();
+        COTDRecipeSerializers.init();
         COTDParticleTypes.init();
 
         // Register the setup method for modloading
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setup);
-        modEventBus.addListener(COTDFeaturePlacement::register);
+        // modEventBus.addListener(COTDFeaturePlacement::register);
         // Register the enqueueIMC method for modloading
         modEventBus.addListener(this::enqueueIMC);
         // Register the processIMC method for modloading

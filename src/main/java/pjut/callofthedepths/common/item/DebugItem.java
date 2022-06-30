@@ -22,9 +22,9 @@ public class DebugItem extends Item {
         if (!level.isClientSide) {
             BiomeSource biomeSource = ((ServerLevel)level).getChunkSource().getGenerator().getBiomeSource();
 
-            for (Biome b: biomeSource.possibleBiomes()) {
-                System.out.println(b.getRegistryName().toString());
-            }
+            // for (Biome b: biomeSource.possibleBiomes()) {
+            //    System.out.println(b.getRegistryName().toString());
+            //}
         }
         return super.use(level, player, hand);
     }

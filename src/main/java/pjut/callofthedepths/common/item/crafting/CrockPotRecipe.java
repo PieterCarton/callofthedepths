@@ -2,7 +2,6 @@ package pjut.callofthedepths.common.item.crafting;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -13,20 +12,20 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 import pjut.callofthedepths.common.block.entity.CrockPotBlockEntity;
-import pjut.callofthedepths.common.registry.COTDRecipeTypes;
+import pjut.callofthedepths.common.registry.COTDRecipeSerializers;
 
 public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
+    public static RecipeType<CrockPotRecipe> TYPE;
     public static final int INGREDIENT_COUNT = 8;
 
     private final ResourceLocation id;
-    private final ItemStack result;
     private final int cookTime;
     private final NonNullList<Ingredient> ingredients;
+    private final ItemStack result;
 
     public CrockPotRecipe(ResourceLocation id, ItemStack result, NonNullList<Ingredient> ingredients, int cookTime) {
         this.id = id;
@@ -67,7 +66,7 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
 
     @Override
     public ItemStack getResultItem() {
-        return this.result;
+        return this.result.copy();
     }
 
     public int getCookTime() {
@@ -81,12 +80,12 @@ public class CrockPotRecipe implements Recipe<CrockPotBlockEntity> {
 
     @Override
     public RecipeType<?> getType() {
-        return COTDRecipeTypes.CROCK_POT;
+        return TYPE;
     }
 
     @Override
     public RecipeSerializer<CrockPotRecipe> getSerializer() {
-        return COTDRecipeTypes.CROCK_POT_SERIALIZER.get();
+        return COTDRecipeSerializers.CROCK_POT_SERIALIZER.get();
     }
 
     public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<CrockPotRecipe> {
